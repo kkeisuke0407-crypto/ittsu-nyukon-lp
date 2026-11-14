@@ -386,6 +386,25 @@ a{color:inherit}
 @keyframes floatR{50%{transform:rotate(-8deg) translateY(-8px)}}
 @keyframes bob{50%{transform:translateY(-5px) rotate(-2deg)}}
 @keyframes shout{0%{opacity:0;transform:scale(2.2)}60%{opacity:1;transform:scale(.92)}100%{opacity:1;transform:none}}
+/* FVのヤギ：ゆらゆら揺れて、ときどき小さく跳ねる。タップで大きく跳ねる */
+.char--hero>img{transform-origin:50% 100%;animation:goat 5.6s 1.3s ease-in-out infinite;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.char--hero.is-hop>img{animation:hop .75s cubic-bezier(.3,.7,.4,1)}
+@keyframes goat{
+  0%,48%,100%{transform:none}
+  12%{transform:rotate(-2.5deg) translateY(-3px)}
+  24%{transform:rotate(1.8deg)}
+  36%{transform:rotate(-1.5deg) translateY(-2px)}
+  60%{transform:scale(1.04,.95)}
+  68%{transform:translateY(-16px) rotate(-3deg) scale(.98,1.04)}
+  76%{transform:scale(1.05,.95)}
+  84%{transform:none}
+}
+@keyframes hop{
+  0%,100%{transform:none}
+  20%{transform:scale(1.06,.92)}
+  50%{transform:translateY(-34px) rotate(-7deg) scale(.97,1.05)}
+  78%{transform:scale(1.06,.93)}
+}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;transition-delay:0s!important}
   html{scroll-behavior:auto}

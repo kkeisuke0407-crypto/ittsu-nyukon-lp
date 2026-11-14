@@ -125,6 +125,13 @@ document.querySelectorAll('.char[data-img]').forEach(el => {
   img.onload = () => { const s = el.querySelector('.slot'); if (s) s.replaceWith(img); else el.append(img); };
   img.src = `assets/img/${el.dataset.img}.png`;
 });
+/* FVのヤギ：タップ（クリック）すると大きく跳ねる */
+document.querySelectorAll('.char--hero').forEach(el => {
+  el.addEventListener('click', () => {
+    el.classList.remove('is-hop'); void el.offsetWidth; el.classList.add('is-hop');
+  });
+  el.addEventListener('animationend', e => { if (e.animationName === 'hop') el.classList.remove('is-hop'); });
+});
 
 /* 画像枠：data-src のファイルを置くと、枠が画像に替わる（無ければ枠のまま）。
    枠の種類（slot--env など）は ph--env として画像に引き継ぎ、縦横比と見た目をそろえる */

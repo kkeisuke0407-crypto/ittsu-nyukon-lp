@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>LPチラシのデザイン見本｜一通入魂</title><link rel="stylesheet" href="sample-image.css"></head><body><main id="app"></main><script src="samples.js"></script><script>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>LPチラシのデザイン見本｜一通入魂</title><link rel="stylesheet" href="sample-image.css?v=2"></head><body><main id="app"></main><script src="samples.js"></script><script>
+/* A4縦チラシの見本：紙面全体を1枚で見せる（開く順の切り替えはなし） */
 (function(){
 var p=new URLSearchParams(location.search),own=p.get("s")==="ittsu",d=own?{id:"ittsu",name:"一通入魂",ind:"一通入魂のA4チラシ",theme:{c1:"#b9422c"}}:SAMPLES.find(function(x){return x.id===p.get("s")})||SAMPLES[0];
 var app=document.getElementById("app");document.documentElement.style.setProperty("--accent",d.theme.c1);document.title=d.name+"｜A4チラシの見本";
-var paths=own?["../flyers/ittsu_cover.png","../flyers/ittsu_first_open.png","../flyers/ittsu_front.png"]:["stages/"+d.id+"_cover.png","stages/"+d.id+"_open.jpg","img/"+d.id+".jpg"];
+var src=own?"../flyers/ittsu_front.png":"img/"+d.id+".jpg";
 var esc=function(x){return String(x).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]||c})};
-if(p.get("view")==="cover"||p.get("view")==="card"){document.body.className="is-card";app.innerHTML='<img class="card-art" src="'+paths[2]+'" alt="'+esc(d.name)+'のA4チラシ">';return;}
-var names=["① たたんだ状態","② 1枚ひらく","③ 全部ひらく"],captions=["最初のひと言で興味を引き、開いてもらいます。","上の案内と、続きを読ませる文章が見えます。","A4縦の表面に、案内・料金・特典・QRをまとめています。"];
-app.innerHTML='<header><a class="back" href="../design_gallery.html">← デザイン一覧</a><p class="eyebrow">'+esc(d.ind)+'</p><h1>'+esc(d.name)+'</h1><p class="spec">A4縦・両面・上下に三つ折り</p><div class="tabs" role="tablist" aria-label="開く順に見る">'+names.map(function(n,i){return '<button type="button" role="tab" data-i="'+i+'" aria-selected="'+(i===0)+'">'+n+'</button>'}).join("")+'</div><p class="say" id="say">'+captions[0]+'</p></header><div class="paper"><img id="art" src="'+paths[0]+'" alt="'+esc(d.name)+'・たたんだ状態"></div><footer>'+(own?"一通入魂のチラシ案。QRは接続先URL確定前の仮配置です。":"デザイン見本です。会社名・サービス名・条件は架空の例です。QRは仮配置です。")+'<br><a href="../index.html#works">一通入魂のサイトへ戻る</a></footer>';
-var buttons=Array.from(document.querySelectorAll("button[data-i]"));function show(i){buttons.forEach(function(b,k){b.setAttribute("aria-selected",String(k===i));b.tabIndex=k===i?0:-1});document.getElementById("art").src=paths[i];document.getElementById("art").alt=d.name+"・"+names[i];document.getElementById("say").textContent=captions[i];}buttons.forEach(function(b,i){b.addEventListener("click",function(){show(i)});b.addEventListener("keydown",function(e){if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft")return;e.preventDefault();var j=(i+(e.key==="ArrowRight"?1:-1)+3)%3;show(j);buttons[j].focus()})});
+if(p.get("view")==="cover"||p.get("view")==="card"){document.body.className="is-card";app.innerHTML='<img class="card-art" src="'+src+'" alt="'+esc(d.name)+'のA4チラシ">';return;}
+app.innerHTML='<header><a class="back" href="../design_gallery.html">← デザイン一覧</a><p class="eyebrow">'+esc(d.ind)+'</p><h1>'+esc(d.name)+'</h1><p class="spec">A4縦・両面・三つ折り</p></header><div class="paper"><img src="'+src+'" alt="'+esc(d.name)+'のA4チラシ"></div><footer>'+(own?"一通入魂のチラシ案。QRは接続先URL確定前の仮配置です。":"デザイン見本です。会社名・サービス名・条件は架空の例です。QRは仮配置です。")+'<br><a href="../index.html#works">一通入魂のサイトへ戻る</a></footer>';
 })();
 </script></body></html>
