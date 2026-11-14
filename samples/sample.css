@@ -1,0 +1,103 @@
+/* LPチラシの見本（A4三つ折り）。色は --c1（メイン）--c2（差し色）--bg（地）を samples.js から入れる
+   1面は 297×630px（A4を三つ折りにした1面 99×210mm の比率） */
+:root{--c1:#333;--c2:#f90;--bg:#fafafa;--ink:#222;--mute:#666;--f:"Zen Kaku Gothic New","Hiragino Sans",sans-serif}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#d9d4cc;color:var(--ink);font:500 12px/1.7 var(--f)}
+body.f-serif{--h:"Zen Old Mincho","Yu Mincho",serif}
+body.f-sans{--h:"Zen Kaku Gothic New","Hiragino Sans",sans-serif}
+body.f-round{--h:"Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif}
+h1,h2,h3,p{margin:0}
+ul,ol,dl{margin:0;padding:0;list-style:none}
+
+/* 見本の外枠 */
+.note{position:sticky;top:0;left:0;z-index:10;padding:4px 12px;background:#1d1410;color:#ffd9a8;font-size:11px;font-weight:700;text-align:center}
+.note a{margin-left:8px;color:#fff}
+.vw{padding:18px 16px 10px;text-align:center}
+.vw__ind{display:inline-block;padding:1px 10px;border-radius:999px;background:var(--c1);color:#fff;font-weight:900;font-size:11px}
+.vw__ttl{margin-top:6px;font:900 20px/1.4 var(--h)}
+.vw__spec{margin-top:2px;font-size:12px;color:var(--mute)}
+.vw__tabs{display:inline-grid;grid-template-columns:1fr 1fr;margin-top:12px;border:2px solid var(--c1);border-radius:999px;overflow:hidden}
+.vw__tabs button{padding:8px 16px;border:0;background:#fff;color:var(--c1);font:900 13px var(--f);cursor:pointer}
+.vw__tabs button[aria-selected="true"]{background:var(--c1);color:#fff}
+.sheet-wrap{overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 16px 10px}
+.sheet{display:flex;width:max-content;margin:0 auto;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.sheet[hidden]{display:none}
+.col{scroll-snap-align:center;position:relative}
+.col+.col::before{content:"";position:absolute;left:0;top:26px;bottom:0;z-index:2;border-left:1px dashed rgba(0,0,0,.25)}
+.cap{height:26px;padding:4px 10px;background:#1d1410;color:#ffd9a8;font-size:11px;font-weight:700;white-space:nowrap}
+.cap b{margin-right:6px;color:#fff}
+.hint{padding:0 16px 24px;text-align:center;font-size:11px;color:var(--mute)}
+@media (min-width:960px){.hint{display:none}}
+
+/* 1面 */
+.pn{position:relative;width:297px;height:630px;overflow:hidden;padding:22px 18px;background:#fff;display:flex;flex-direction:column}
+.pn__h{font:900 19px/1.45 var(--h);color:var(--c1);text-align:center}
+.en{font-size:10px;font-weight:900;letter-spacing:.24em;color:var(--c2);text-align:center}
+
+/* ① 表紙 */
+.pn--cover{padding:0;background:var(--bg)}
+.cv__name{padding:10px 16px;background:var(--c1);color:#fff;font:900 14px var(--h)}
+.cv__target{margin:18px 16px 0;width:max-content;max-width:calc(100% - 32px);padding:2px 10px;border:2px solid var(--c2);border-radius:4px;color:var(--c2);font-weight:900;font-size:12px}
+.cv__h1{margin:10px 16px 0;font:900 27px/1.4 var(--h);letter-spacing:.01em}
+.img{display:grid;place-items:center;margin:16px 16px 0;aspect-ratio:16/11;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,color-mix(in srgb,var(--c1) 22%,#fff),color-mix(in srgb,var(--c2) 26%,#fff));border:2px dashed color-mix(in srgb,var(--c1) 40%,transparent)}
+.img span{padding:8px;font-size:11px;font-weight:900;color:var(--c1);text-align:center}
+.img.has-img{border:0}
+.img img{width:100%;height:100%;object-fit:cover;display:block}
+.cv__sub{margin:14px 16px 0;font-size:12.5px;line-height:1.8;color:var(--mute)}
+.cv__offer{margin-top:auto;display:grid;gap:2px;padding:12px 16px 14px;background:var(--c2);color:#fff;text-align:center;font-weight:700;font-size:11px}
+.cv__offer b{font:900 20px/1.3 var(--h)}
+.l-b .pn--cover{background:var(--c1);color:#fff}
+.l-b .cv__name{background:rgba(0,0,0,.25)}
+.l-b .cv__sub{color:rgba(255,255,255,.85)}
+.l-b .img{border-color:rgba(255,255,255,.4);background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.06))}
+.l-b .img span{color:#fff}
+.l-c .pn--cover .img{order:-1;margin:0;border-radius:0;border-width:0 0 2px}
+.l-c .cv__name{order:-2}
+.l-c .cv__h1{color:var(--c1)}
+
+/* ② 悩み */
+.pn--pains{background:var(--bg);gap:16px;justify-content:center}
+.pains{display:grid;gap:8px}
+.pains li{position:relative;padding:10px 10px 10px 34px;border-radius:8px;background:#fff;font-weight:700;font-size:12.5px;line-height:1.6;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.pains li::before{content:"";position:absolute;left:12px;top:50%;width:12px;height:7px;margin-top:-5px;border-left:3px solid var(--c1);border-bottom:3px solid var(--c1);transform:rotate(-45deg)}
+.bridge{padding:14px 10px;border-radius:10px;background:var(--c1);color:#fff;text-align:center;font:900 15px/1.6 var(--h)}
+.bridge b{color:color-mix(in srgb,var(--c2) 70%,#fff)}
+
+/* ③④ 解決策・理由 */
+.pn--sol{gap:14px}
+.feats{display:grid;gap:14px}
+.feats li{display:grid;gap:6px;padding:16px 14px;border-radius:12px;background:var(--bg)}
+.feats b{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--c1);color:#fff;font:900 16px var(--h)}
+.feats h3{font:900 17px/1.5 var(--h);color:var(--c1)}
+.feats p{font-size:12.5px;line-height:1.8;color:var(--mute)}
+.pn--sol .feats li:only-child{flex:1}
+
+/* ⑤ 料金と流れ */
+.pn--price{gap:10px}
+.price{display:grid;gap:6px}
+.price div{display:grid;gap:2px;padding:10px 12px;border-radius:8px;background:var(--bg);font-weight:700}
+.price dd{margin:0;font:900 16px var(--h);color:var(--c1)}
+.tax{font-size:10.5px;color:var(--mute);text-align:right}
+.pn--price .pn__h+.flow,.pn--price .tax+.pn__h{margin-top:8px}
+.flow{display:grid;gap:8px}
+.flow li{display:grid;gap:1px;padding:9px 12px;border-left:5px solid var(--c1);border-radius:6px;background:var(--bg);font-weight:900;font-size:13px}
+.flow li b{font-size:10px;letter-spacing:.16em;color:var(--c2)}
+
+/* ⑥ 最後の面：特典と申し込み */
+.pn--close{align-items:center;text-align:center;background:var(--c1);color:#fff;gap:6px}
+.cl__tag{padding:2px 12px;border-radius:999px;background:var(--c2);color:#fff;font-weight:900;font-size:11px}
+.cl__offer{margin-top:8px;font:900 26px/1.35 var(--h)}
+.cl__note{font-size:12px;color:rgba(255,255,255,.85)}
+.cl__box{width:100%;margin-top:14px;padding:16px 14px;border-radius:12px;background:#fff;color:var(--ink);display:grid;justify-items:center;gap:8px}
+.cl__cta{font:900 16px/1.4 var(--h);color:var(--c1)}
+.qr{display:grid;place-items:center;width:120px;height:120px;border:3px solid var(--ink);border-radius:6px;background:repeating-linear-gradient(90deg,#fff 0 6px,#eee 6px 12px)}
+.qr span{padding:2px 8px;background:#fff;font-weight:900;font-size:14px;letter-spacing:.1em}
+.cl__qr{font-size:11px;font-weight:700;color:var(--mute)}
+.cl__tel{display:grid;font:900 22px/1.2 var(--f);color:var(--c1)}
+.cl__tel small{font-size:11px;color:var(--mute)}
+.cl__name{margin-top:auto;font:900 14px var(--h)}
+.cl__name small{display:block;font:500 10px var(--f);color:rgba(255,255,255,.7)}
+
+/* カード用（表紙だけ） */
+body.is-cover{background:#fff;overflow:hidden}

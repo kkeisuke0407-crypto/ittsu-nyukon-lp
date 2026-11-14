@@ -1,0 +1,18 @@
+/* 特商法・プライバシー・サンクス共通 */
+.sub{max-width:var(--col);margin:0 auto;min-height:100vh;background:var(--washi)}
+.sub .hd a.logo{text-decoration:none}
+.doc{padding:36px 18px 60px}
+.doc h1{font:400 clamp(22px,6.4vw,28px)/1.4 var(--head);text-align:center}
+.doc .eyebrow{margin-bottom:10px}
+.doc h2{margin-top:28px;padding-left:10px;border-left:5px solid var(--fire1);font-weight:900;font-size:17px;line-height:1.5}
+.doc p,.doc li{font-size:14px;line-height:1.9}
+.doc p{margin-top:8px}
+.doc ul{margin:8px 0 0;padding-left:1.3em}
+.doc dl{margin:22px 0 0;border:2px solid var(--ink);border-radius:10px;background:#fff;overflow:hidden}
+.doc dl div{display:grid;grid-template-columns:34% 1fr;border-bottom:1px solid var(--line)}
+.doc dl div:last-child{border-bottom:0}
+.doc dt{padding:12px;background:#f6ecd8;font-weight:900;font-size:13px;line-height:1.6}
+.doc dd{margin:0;padding:12px;font-size:13.5px;line-height:1.8}
+.todo{padding:0 4px;background:#ffe2c2;color:#a3330f;font-weight:900}
+.doc .date{margin-top:28px;text-align:right;font-size:13px;color:var(--mute)}
+.back{display:block;width:max-content;margin:32px auto 0;font-weight:900;color:var(--fire1)}

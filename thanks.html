@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>お申し込みありがとうございます｜一通入魂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Yuji+Syuku&family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Anton&display=swap">
+<link rel="stylesheet" href="assets/lp.css?v=13">
+<link rel="stylesheet" href="assets/sub.css">
+<style>
+.thx{position:relative;padding:44px 18px 40px;text-align:center}
+.thx h1{position:relative;z-index:1;font:400 clamp(24px,7vw,30px)/1.5 var(--head)}
+.thx h1 .brush{font-size:1.3em}
+.thx__stage{position:relative;z-index:1;width:260px;margin:18px auto 0;padding-top:20px}
+.fire--thx{left:0;right:0;top:0;bottom:-6px}
+.thx__char{position:relative;z-index:1;width:150px;margin:0 auto}
+.thx__msg{position:relative;z-index:1;margin-top:18px;font-weight:700;font-size:14.5px;line-height:1.9;color:#f3dcc3}
+.next{padding:30px 18px 50px}
+.next h2{font:400 20px var(--head);text-align:center}
+.next ol{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:10px}
+.next li{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;padding:12px;border:2px solid var(--ink);border-radius:10px;background:#fff;font-weight:700;font-size:14px;line-height:1.6}
+.next li b{display:grid;place-items:center;width:44px;height:44px;border-radius:8px;background:var(--ink);color:#fff;font:400 18px var(--num)}
+.next li.is-now{border-color:var(--fire1)}
+.next li.is-now b{background:var(--fire)}
+.next li em{display:block;font-style:normal;font-size:12px;color:var(--fire1)}
+</style>
+</head>
+<body>
+<div class="sub washi">
+  <header class="hd"><a class="logo" href="index.html"><span class="logo__mark" aria-hidden="true"></span>一通入魂</a></header>
+  <section class="thx dark" data-embers="14">
+    <p class="eyebrow">THANK YOU</p>
+    <h1 id="thxH">お申し込み、<br><span class="brush fire-txt">ありがとう<br>ございます</span></h1>
+    <p class="thx__msg" id="thxMsg">担当者から<span class="todo">【要確認】2営業日以内</span>に、<br>お見積もりと今後の流れをメールでお送りします。</p>
+  </section>
+  <section class="next">
+    <h2>このあとの流れ</h2>
+    <ol id="thxSteps">
+      <li><b>01</b><span>お申し込み完了</span></li>
+      <li class="is-now"><b>02</b><span><em>いまここ</em>担当者からメールでご連絡</span></li>
+      <li><b>03</b><span>送り先と内容を決める</span></li>
+      <li><b>04</b><span>LPチラシ制作 → 宛名を手書き → 投函</span></li>
+    </ol>
+    <a class="back" href="index.html">← トップへ戻る</a>
+  </section>
+</div>
+<script>
+/* 無料相談の予約（TimeRex）から来たときは、予約用の文面に替える */
+(() => {
+  const q = new URLSearchParams(location.search);
+  if (q.get('type') !== 'book') return;
+  const way = q.get('way') === 'phone' ? 'お電話' : 'Web会議';
+  document.title = 'ご予約ありがとうございます｜一通入魂';
+  document.getElementById('thxH').innerHTML = '無料相談のご予約、<br><span class="brush fire-txt">ありがとう<br>ございます</span>';
+  document.getElementById('thxMsg').innerHTML = `ご予約の日時に、${way}でご相談をうかがいます。<br>予約の内容は、確認のメールでもお知らせします。`;
+  document.getElementById('thxSteps').innerHTML = `
+      <li><b>01</b><span>ご予約完了</span></li>
+      <li class="is-now"><b>02</b><span><em>いまここ</em>予約の日時まで少々お待ちください</span></li>
+      <li><b>03</b><span>無料相談（${way}）で送り先と内容を決める</span></li>
+      <li><b>04</b><span>LPチラシ制作 → 宛名を手書き → 投函</span></li>`;
+})();
+</script>
+<script src="assets/lp.js?v=8"></script>
+<script src="assets/fx.js?v=3"></script>
+</body>
+</html>

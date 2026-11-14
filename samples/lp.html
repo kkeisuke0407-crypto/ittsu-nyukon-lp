@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>LPチラシの見本｜一通入魂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Zen+Old+Mincho:wght@700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+<link rel="stylesheet" href="sample.css?v=2">
+</head>
+<body>
+<div id="app"></div>
+<script src="samples.js?v=2"></script>
+<script>
+(() => {
+  const q = new URLSearchParams(location.search);
+  const d = SAMPLES.find(x => x.id === q.get('s')) || SAMPLES[0];
+  const t = d.theme, root = document.documentElement;
+  root.style.setProperty('--c1', t.c1); root.style.setProperty('--c2', t.c2); root.style.setProperty('--bg', t.bg);
+  document.body.classList.add('f-' + t.font, 'l-' + t.layout);
+  document.title = `${d.name}（LPチラシの見本：${d.ind}）｜一通入魂`;
+  const n = i => String(i + 1).padStart(2, '0');
+
+  /* A4三つ折り（巻き三つ折り）の6面。読む順番を番号で示す */
+  const cover = `<section class="pn pn--cover">
+      <p class="cv__name">${d.name}</p>
+      <p class="cv__target">${d.target}</p>
+      <h1 class="cv__h1">${d.h1}</h1>
+      <div class="img"><span>${d.img}</span></div>
+      <p class="cv__sub">${d.sub}</p>
+      <p class="cv__offer"><b>${d.offer[0]}</b>くわしくは中面へ</p>
+    </section>`;
+  const pains = `<section class="pn pn--pains">
+      <h2 class="pn__h">こんなお悩み、<br>ありませんか？</h2>
+      <ul class="pains">${d.pains.map(p => `<li>${p}</li>`).join('')}</ul>
+      <p class="bridge">その悩み、<br><b>${d.name}</b>に<br>お任せください。</p>
+    </section>`;
+  const feat = (f, i) => `<li><b>${n(i)}</b><h3>${f[0]}</h3><p>${f[1]}</p></li>`;
+  const sol1 = `<section class="pn pn--sol">
+      <p class="en">REASON</p>
+      <h2 class="pn__h">${d.name}が<br>選ばれる3つの理由</h2>
+      <ol class="feats">${feat(d.feats[0], 0)}</ol>
+    </section>`;
+  const sol2 = `<section class="pn pn--sol">
+      <ol class="feats">${feat(d.feats[1], 1)}${feat(d.feats[2], 2)}</ol>
+    </section>`;
+  const priceFlow = `<section class="pn pn--price">
+      <h2 class="pn__h">料金</h2>
+      <dl class="price">${d.price.map(p => `<div><dt>${p[0]}</dt><dd>${p[1]}</dd></div>`).join('')}</dl>
+      <p class="tax">表示は税別です</p>
+      <h2 class="pn__h">お申し込みの流れ</h2>
+      <ol class="flow">${d.flow.map((f, i) => `<li><b>STEP${i + 1}</b>${f}</li>`).join('')}</ol>
+    </section>`;
+  const close = `<section class="pn pn--close">
+      <p class="cl__tag">チラシをご覧の方へ</p>
+      <p class="cl__offer">${d.offer[0]}</p>
+      <p class="cl__note">${d.offer[1]}</p>
+      <div class="cl__box">
+        <p class="cl__cta">${d.cta}</p>
+        <div class="qr" aria-label="QRコード"><span>QR</span></div>
+        <p class="cl__qr">QRコードから、そのままお申し込み</p>
+        <p class="cl__tel"><small>お電話でも</small>000-0000-0000</p>
+      </div>
+      <p class="cl__name">${d.name}<small>（架空の会社です）</small></p>
+    </section>`;
+  const cap = (no, txt) => `<p class="cap"><b>${no}</b>${txt}</p>`;
+
+  if (q.get('view') === 'cover') { /* 一通入魂のカード用：表紙だけ */
+    document.body.classList.add('is-cover');
+    document.getElementById('app').innerHTML = cover;
+  } else {
+    document.getElementById('app').innerHTML = `
+    <p class="note">LPチラシの見本｜架空の会社・サービスです <a href="../index.html#works" target="_top">一通入魂へ戻る</a></p>
+    <header class="vw">
+      <p class="vw__ind">${d.ind}</p>
+      <h1 class="vw__ttl">${d.name}のLPチラシ</h1>
+      <p class="vw__spec">A4両面・三つ折り。番号の順に読み進める作りです。</p>
+      <div class="vw__tabs" role="tablist" aria-label="見る面を選ぶ">
+        <button type="button" role="tab" aria-selected="true" data-side="out">表紙側（外面）</button>
+        <button type="button" role="tab" aria-selected="false" data-side="in">中面</button>
+      </div>
+    </header>
+    <div class="sheet-wrap">
+      <div class="sheet" data-side="out">
+        <div class="col">${cap('①', '表紙：つかみ')}${cover}</div>
+        <div class="col">${cap('②', '開くと最初に見える面：悩み')}${pains}</div>
+        <div class="col">${cap('⑥', '最後の面：特典と申し込み')}${close}</div>
+      </div>
+      <div class="sheet" data-side="in" hidden>
+        <div class="col">${cap('③', '解決策')}${sol1}</div>
+        <div class="col">${cap('④', '選ばれる理由')}${sol2}</div>
+        <div class="col">${cap('⑤', '料金と流れ')}${priceFlow}</div>
+      </div>
+    </div>
+    <p class="hint">横にスクロールすると、3面すべて見られます。</p>`;
+    const tabs = document.querySelectorAll('[data-side][role="tab"]');
+    tabs.forEach(b => b.addEventListener('click', () => {
+      tabs.forEach(x => x.setAttribute('aria-selected', String(x === b)));
+      document.querySelectorAll('.sheet').forEach(s => { s.hidden = s.dataset.side !== b.dataset.side; });
+      document.querySelector('.sheet-wrap').scrollLeft = 0;
+    }));
+  }
+  /* 表紙の画像：samples/img/<id>.jpg があれば差し替える */
+  const im = new Image();
+  im.alt = ''; im.onload = () => document.querySelectorAll('.img').forEach(box => { box.innerHTML = ''; box.append(im.cloneNode()); box.classList.add('has-img'); });
+  im.src = `img/${d.id}.jpg`;
+})();
+</script>
+</body>
+</html>
