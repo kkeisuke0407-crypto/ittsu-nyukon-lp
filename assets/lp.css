@@ -431,13 +431,16 @@ a{color:inherit}
 .wcar__track::-webkit-scrollbar{display:none}
 .wcard{flex:0 0 52%;max-width:220px;scroll-snap-align:center;display:flex;flex-direction:column;text-decoration:none;color:#fff;text-align:left;transform:scale(.92);opacity:.6;transition:transform .4s cubic-bezier(.2,1.2,.4,1),opacity .4s}
 .wcard.is-active{transform:none;opacity:1}
-.wcard__view{position:relative;aspect-ratio:297/630;overflow:hidden;border:3px solid #3a2519;border-radius:6px;background:#fff;box-shadow:0 12px 28px rgba(0,0,0,.45)}
+.wcard__view{position:relative;aspect-ratio:210/297;overflow:hidden;border:3px solid #3a2519;border-radius:6px;background:#fff;box-shadow:0 12px 28px rgba(0,0,0,.45)}
 .wcard.is-active .wcard__view{border-color:var(--fire2);box-shadow:0 0 0 1px var(--fire3),0 0 26px rgba(255,110,20,.45)}
 .wcard__no{margin-top:10px;font:400 13px var(--num);letter-spacing:.14em;color:var(--fire3)}
 .wcard__ind{font-weight:900;font-size:15px;line-height:1.4}
 .wcard__h{margin-top:2px;font-size:12.5px;line-height:1.6;color:#d9bfa3}
 .works .dots button{background:#5a3d2c}
-.wcard__view iframe{position:absolute;left:0;top:0;width:297px;height:630px;border:0;transform-origin:0 0;pointer-events:none}
+.works__links{display:grid;gap:8px;margin-top:14px}
+.works__links a{display:block;padding:10px 14px;border:1px solid rgba(255,170,90,.55);border-radius:10px;color:#ffd9a8;font-weight:900;font-size:13.5px;text-decoration:none}
+.works__links a::after{content:" →"}
+.wcard__view iframe{position:absolute;left:0;top:0;width:297px;height:420px;border:0;transform-origin:0 0;pointer-events:none}
 
 /* ---------- PC左パネル：3段のしくみ ---------- */
 .sflow{list-style:none;margin:0;padding:0;display:grid;gap:22px;width:min(300px,100%)}
