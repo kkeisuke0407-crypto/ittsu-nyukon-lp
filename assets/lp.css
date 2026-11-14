@@ -456,10 +456,24 @@ a{color:inherit}
 .wcard__ind{font-weight:900;font-size:15px;line-height:1.4}
 .wcard__h{margin-top:2px;font-size:12.5px;line-height:1.6;color:#d9bfa3}
 .works .dots button{background:#5a3d2c}
-.works__links{display:grid;gap:8px;margin-top:14px}
-.works__links a{display:block;padding:10px 14px;border:1px solid rgba(255,170,90,.55);border-radius:10px;color:#ffd9a8;font-weight:900;font-size:13.5px;text-decoration:none}
-.works__links a::after{content:" →"}
-.wcard__view iframe{position:absolute;left:0;top:0;width:297px;height:420px;border:0;transform-origin:0 0;pointer-events:none}
+.wcard{border:0;background:none;padding:0;font:inherit;cursor:zoom-in}
+.wcard__view img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 0}
+.wcard__zoom{position:absolute;right:8px;bottom:8px;width:34px;height:34px;border-radius:50%;background:rgba(29,20,16,.82);box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.wcard__zoom::before{content:"";position:absolute;left:8px;top:8px;width:11px;height:11px;border:2.5px solid #fff;border-radius:50%}
+.wcard__zoom::after{content:"";position:absolute;left:21px;top:20px;width:2.5px;height:8px;background:#fff;border-radius:2px;transform:rotate(-45deg)}
+/* 見本の拡大表示 */
+html.is-zoom{overflow:hidden}
+.zoom{position:fixed;inset:0;z-index:9999;display:grid;grid-template-rows:auto 1fr auto;background:rgba(14,9,6,.98)}
+.zoom[hidden]{display:none}
+.zoom__bar{display:flex;align-items:center;gap:10px;padding:10px 12px 10px 16px;color:#ffd9a8}
+.zoom__ttl{flex:1;font-weight:900;font-size:14px}
+.zoom__x{width:42px;height:42px;border:0;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;font-size:26px;line-height:1;cursor:pointer}
+.zoom__body{overflow:auto;-webkit-overflow-scrolling:touch;padding:0 12px 12px;text-align:center}
+.zoom__img{display:block;width:min(100%,760px);height:auto;margin:0 auto;background:#fff;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.zoom__nav{position:absolute;top:50%;width:44px;height:44px;margin-top:-22px;border:0;border-radius:50%;background:rgba(29,20,16,.85);color:#fff;font-size:30px;line-height:1;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.zoom__nav--prev{left:8px}
+.zoom__nav--next{right:8px}
+.zoom__note{padding:6px 12px 12px;text-align:center;font-size:11px;color:#bba48f}
 
 /* ---------- PC左パネル：3段のしくみ ---------- */
 .sflow{list-style:none;margin:0;padding:0;display:grid;gap:22px;width:min(300px,100%)}

@@ -70,16 +70,47 @@
     requestAnimationFrame(() => { track.scrollTo({ left: center(0) }); mark(); });
     restart();
   }
-  /* LPチラシ見本：samples/samples.js から10枚のカードを作る（中身は縮小したチラシの表紙） */
+  /* LPチラシ見本：samples/samples.js から10枚のカードを作る。押すとA4の紙面を拡大表示 */
   const wt = $('#worksTrack');
   if (wt && window.SAMPLES) {
-    wt.innerHTML = SAMPLES.map((s, i) => `<a class="wcard" href="samples/lp.html?s=${s.id}" target="_blank" rel="noopener">
-      <span class="wcard__view"><iframe src="samples/lp.html?s=${s.id}&amp;view=cover" loading="lazy" tabindex="-1" aria-hidden="true" title=""></iframe></span>
+    const src = s => `samples/img/${s.id}.jpg`;
+    wt.innerHTML = SAMPLES.map((s, i) => `<button type="button" class="wcard" data-i="${i}" aria-label="${s.ind}の見本を拡大して見る">
+      <span class="wcard__view"><img src="samples/img/thumb/${s.id}.jpg" alt="" loading="lazy" decoding="async"><i class="wcard__zoom" aria-hidden="true"></i></span>
       <span class="wcard__no">SAMPLE ${String(i + 1).padStart(2, '0')}</span>
       <span class="wcard__ind">${s.ind}</span>
-      <span class="wcard__h">${s.h1.replace(/<br>/g, '')}</span></a>`).join('');
-    const fit = () => $$('.wcard__view', wt).forEach(v => { const f = v.firstElementChild; f.style.transform = `scale(${v.clientWidth / 297})`; });
-    fit(); addEventListener('resize', fit);
+      <span class="wcard__h">${s.h1.replace(/<br>/g, '')}</span></button>`).join('');
+
+    /* 拡大表示（閉じる：×・背景・Esc／前後：矢印ボタン・キー） */
+    const box = document.createElement('div');
+    box.className = 'zoom'; box.hidden = true;
+    box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', 'チラシの見本');
+    box.innerHTML = `<div class="zoom__bar"><p class="zoom__ttl"></p><button type="button" class="zoom__x" aria-label="閉じる">×</button></div>
+      <div class="zoom__body"><img class="zoom__img" alt=""></div>
+      <button type="button" class="zoom__nav zoom__nav--prev" data-step="-1" aria-label="前の見本">‹</button>
+      <button type="button" class="zoom__nav zoom__nav--next" data-step="1" aria-label="次の見本">›</button>
+      <p class="zoom__note">会社名・サービス名・条件は架空の例です</p>`;
+    document.body.appendChild(box);
+    const img = $('.zoom__img', box), ttl = $('.zoom__ttl', box), body = $('.zoom__body', box);
+    let at = 0, back = null;
+    const show = i => {
+      at = (i + SAMPLES.length) % SAMPLES.length;
+      const s = SAMPLES[at];
+      img.src = src(s); img.alt = `${s.ind}（${s.name}）のA4チラシの見本`;
+      ttl.textContent = `SAMPLE ${String(at + 1).padStart(2, '0')}　${s.ind}`;
+      body.scrollTop = 0;
+    };
+    const open = i => { back = document.activeElement; show(i); box.hidden = false; document.documentElement.classList.add('is-zoom'); $('.zoom__x', box).focus(); };
+    const close = () => { box.hidden = true; document.documentElement.classList.remove('is-zoom'); back && back.focus(); };
+    wt.addEventListener('click', e => { const c = e.target.closest('.wcard'); if (c) open(+c.dataset.i); });
+    $('.zoom__x', box).addEventListener('click', close);
+    box.addEventListener('click', e => { if (e.target === box || e.target === body) close(); });
+    $$('.zoom__nav', box).forEach(b => b.addEventListener('click', () => show(at + +b.dataset.step)));
+    addEventListener('keydown', e => {
+      if (box.hidden) return;
+      if (e.key === 'Escape') close();
+      if (e.key === 'ArrowRight') show(at + 1);
+      if (e.key === 'ArrowLeft') show(at - 1);
+    });
   }
   carousel($('[data-carousel="works"]'), 3600);
   carousel($('[data-carousel="scene"]'), 4200);
