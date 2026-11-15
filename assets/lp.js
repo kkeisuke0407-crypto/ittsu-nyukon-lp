@@ -164,11 +164,39 @@ document.querySelectorAll('.char--hero, .char--must, .stick__goat').forEach(el =
   el.addEventListener('animationend', e => { if (e.animationName === 'hop') el.classList.remove('is-hop'); });
 });
 
-/* フォームの送信先は未設定（決まったら action を設定してこの処理を外す） */
-document.querySelectorAll('form[data-placeholder]').forEach(f => f.addEventListener('submit', e => {
-  e.preventDefault();
-  alert('フォームの送信先はまだ設定されていません。送信後は thanks.html に移る想定です。');
-}));
+/* 申し込みフォーム。予約と同じ受付（../予約ツール_GAS、#book の data-api）へ送り、受け付けたら thanks.html へ */
+document.querySelectorAll('form[data-apply]').forEach(f => {
+  const bookEl = document.getElementById('book');
+  const dev = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && new URLSearchParams(location.search).get('bookapi');
+  const api = dev || (bookEl && bookEl.dataset.api) || '';
+  const btn = f.querySelector('button[type="submit"]');
+  const label = btn.textContent;
+  const msg = document.createElement('p');
+  msg.className = 'bk-err'; msg.setAttribute('role', 'alert'); msg.hidden = true;
+  btn.before(msg);
+  const say = t => { msg.textContent = t; msg.hidden = !t; if (t) msg.scrollIntoView({ block: 'center', behavior: 'smooth' }); };
+  const g = k => (f.elements[k] && f.elements[k].value || '').trim();
+  f.addEventListener('change', () => { if (!msg.hidden) say(''); });
+  f.addEventListener('submit', e => {
+    e.preventDefault();
+    const bad = !g('company') || !g('name') ? '会社名とお名前を入れてください。'
+      : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g('email')) ? 'メールアドレスを確かめてください。'
+      : !f.elements.agree.checked ? 'プライバシーポリシーへの同意が必要です。' : '';
+    if (bad) { say(bad); return; }
+    if (!api) { say('申し込みの受付は準備中です。お手数ですが「無料相談を予約」からご連絡ください。'); return; }
+    say('');
+    btn.disabled = true; btn.textContent = '送信しています…';
+    const body = { kind: 'apply', agree: true, website: g('website') };
+    ['company', 'name', 'email', 'tel', 'volume', 'plan', 'list', 'when', 'code', 'note'].forEach(k => { body[k] = g(k); });
+    fetch(api, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+      .then(r => r.json()).then(j => {
+        if (j.ok) { location.href = 'thanks.html?type=apply'; return; }
+        say(j.error || '送信できませんでした。もう一度お試しください。');
+        btn.disabled = false; btn.textContent = label;
+      })
+      .catch(() => { say('通信できませんでした。電波のよい所でもう一度お試しください。'); btn.disabled = false; btn.textContent = label; });
+  });
+});
 
 /* 予約・申し込みのタブ。ページ内のボタン（data-open="book" / "apply"）からも切り替える */
 (() => {
@@ -197,7 +225,7 @@ document.querySelectorAll('form[data-placeholder]').forEach(f => f.addEventListe
   const ways = Array.from(document.querySelectorAll('.way__btn'));
   if (!book) return;
   const dev = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && new URLSearchParams(location.search).get('bookapi');
-  const api = book.dataset.api || dev || '';
+  const api = dev || book.dataset.api || '';
   const WEEK = '日月火水木金土';
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const wd = ymd => { const [y, m, d] = ymd.split('-').map(Number); return WEEK[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]; };

@@ -29,7 +29,7 @@
 <link rel="preload" href="assets/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap">
 <script>document.documentElement.classList.add('js')</script>
-<link rel="stylesheet" href="assets/lp.css?v=24">
+<link rel="stylesheet" href="assets/lp.css?v=25">
 </head>
 <body>
 <div class="shell">
@@ -546,7 +546,7 @@
           </div>
 
           <div class="ctab__pane" id="pane-apply" role="tabpanel" aria-labelledby="tab-apply" hidden>
-            <form class="form" data-placeholder>
+            <form class="form" data-apply novalidate>
               <p class="form__ttl">お申し込み</p>
               <label>会社名<em>必須</em><input type="text" name="company" autocomplete="organization" required></label>
               <label>お名前<em>必須</em><input type="text" name="name" autocomplete="name" required></label>
@@ -570,7 +570,8 @@
                 <select name="when"><option>今月中</option><option>来月</option><option>2〜3か月以内</option><option>まだ決めていない</option></select>
               </label>
               <label>特典コード<input type="text" name="code" autocomplete="off" placeholder="チラシをお持ちの方のみ"></label>
-              <label>ご要望など<textarea name="note" rows="4" placeholder="売りたいサービスや、送りたい相手など"></textarea></label>
+              <label>ご要望など<textarea name="note" rows="4" maxlength="2000" placeholder="売りたいサービスや、送りたい相手など"></textarea></label>
+              <label class="bk-hp" aria-hidden="true">ホームページ<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
               <label class="form__agree"><input type="checkbox" name="agree" required><span><a href="privacy.html">プライバシーポリシー</a>に同意する</span></label>
               <button class="btn btn--fire" type="submit">この内容で申し込む</button>
               <p class="form__note">担当者から、お見積もりと今後の流れをメールでお送りします。</p>
@@ -600,7 +601,7 @@
   <a class="btn btn--fire" href="#contact" data-open="book"><span>初回お試し 100通50,000円（LPチラシ込み）</span>無料相談を予約する</a>
 </div>
 <script src="samples/samples.js?v=3"></script>
-<script src="assets/lp.js?v=15"></script>
+<script src="assets/lp.js?v=16"></script>
 <script src="assets/fx.js?v=4"></script>
 </body>
 </html>
