@@ -64,8 +64,8 @@ a{color:inherit}
 .wrap{position:relative;z-index:1;padding-inline:18px}
 .sec{padding-block:68px}
 .logo{display:inline-flex;align-items:center;gap:8px;font:400 24px/1 var(--brush);letter-spacing:.06em;color:#fff;white-space:nowrap}
-.logo__mark{display:inline-grid;place-items:center;width:1.15em;height:1.15em;border-radius:4px;background:var(--red);box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
-.logo__mark::after{content:"魂";font:400 .7em/1 var(--brush);color:#fff}
+/* ロゴの印：ヤギの顔（丸・赤い縁） */
+.logo__mark{flex:none;display:inline-block;width:1.35em;height:1.35em;border-radius:50%;background:#f3e6d2 url(img/goat_face.webp) 52% 14%/138% no-repeat;box-shadow:0 0 0 2px var(--red),0 0 0 3.5px rgba(255,255,255,.35)}
 .logo--lg{font-size:40px}
 .logo--in{font-size:1em;color:var(--fire1)}
 .dark .logo--in{color:var(--fire3)}
