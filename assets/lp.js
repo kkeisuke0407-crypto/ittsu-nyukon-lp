@@ -190,36 +190,126 @@ document.querySelectorAll('form[data-placeholder]').forEach(f => f.addEventListe
   });
   document.querySelectorAll('[data-open]').forEach(a => a.addEventListener('click', () => show(a.dataset.open)));
 
-  /* 予約カレンダー（TimeRex）。#book の data-url-online / data-url-phone に予約ページのURLを入れると表示される。
-     TimeRexの埋め込みは1ページに1つなので、方法を切り替えるたびに読み込み直す */
+  /* 無料相談の予約。自前の予約ツール（../予約ツール_GAS、Google Apps Script）から空き日時をもらい、
+     選んだ枠でGoogleカレンダーに予定を入れる。オンラインはGoogle Meetのリンクが自動で付く。
+     #book の data-api に、デプロイしたウェブアプリのURL（…/exec）を入れると動く */
   const book = document.getElementById('book');
   const ways = Array.from(document.querySelectorAll('.way__btn'));
   if (!book) return;
-  let scriptLoaded = null;
-  const loadScript = () => scriptLoaded || (scriptLoaded = new Promise((ok, ng) => {
-    const sc = document.createElement('script');
-    sc.id = 'timerex_embed'; sc.src = 'https://asset.timerex.net/js/embed.js';
-    sc.onload = ok; sc.onerror = ng;
-    document.body.appendChild(sc);
-  }));
-  const render = way => {
-    ways.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.way === way)));
-    const url = book.dataset[way === 'phone' ? 'urlPhone' : 'urlOnline'];
-    book.textContent = '';
-    if (!url) {
-      book.innerHTML = '<p class="book__wait">予約カレンダーは準備中です。<br>お手数ですが「申し込む」からご連絡ください。<br><button type="button">申し込むへ</button></p>';
-      book.querySelector('button').addEventListener('click', () => show('apply'));
+  const dev = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && new URLSearchParams(location.search).get('bookapi');
+  const api = book.dataset.api || dev || '';
+  const WEEK = '日月火水木金土';
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const wd = ymd => { const [y, m, d] = ymd.split('-').map(Number); return WEEK[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]; };
+  const md = ymd => { const [, m, d] = ymd.split('-').map(Number); return { m, d }; };
+  const addMin = (hm, n) => { const t = +hm.slice(0, 2) * 60 + +hm.slice(3) + n; return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; };
+  const when = (ymd, hm) => { const { m, d } = md(ymd); return `${m}月${d}日（${wd(ymd)}）${hm}〜${addMin(hm, st.minutes)}`; };
+
+  const st = { way: 'online', days: null, minutes: 30, day: null, time: null, msg: '', input: {} };
+
+  const toApply = () => { show('apply'); document.getElementById('pane-apply').scrollIntoView({ block: 'start' }); };
+  const note = (html, retry) => {
+    book.innerHTML = `<p class="book__wait">${html}<br><button type="button" data-act="apply">申し込むへ</button>${retry ? ' <button type="button" data-act="retry">読み込み直す</button>' : ''}</p>`;
+  };
+
+  const load = () => {
+    book.innerHTML = '<p class="book__wait">空いている日時を読み込んでいます…</p>';
+    return fetch(api, { cache: 'no-store' }).then(r => r.json()).then(j => {
+      if (!j.ok) throw new Error(j.error || '');
+      st.days = j.days || []; st.minutes = j.minutes || 30;
+      if (!st.days.some(x => x.date === st.day)) { st.day = st.days[0] ? st.days[0].date : null; st.time = null; }
+      draw();
+    }).catch(() => note('予約できる日時を読み込めませんでした。<br>時間をおいて開き直すか、「申し込む」からご連絡ください。', true));
+  };
+
+  const draw = () => {
+    if (!api) { note('予約カレンダーは準備中です。<br>お手数ですが「申し込む」からご連絡ください。'); return; }
+    if (!st.days) { load(); return; }
+    if (!st.days.length) { note('いま予約できる日時がありません。<br>お手数ですが「申し込む」からご連絡ください。'); return; }
+    const err = st.msg ? `<p class="bk-err" role="alert">${esc(st.msg)}</p>` : '';
+    if (!st.time) {
+      const cur = st.days.find(x => x.date === st.day) || st.days[0];
+      book.innerHTML = `${err}<p class="bk-h">1. 日にちを選ぶ</p>
+        <div class="bk-days">${st.days.map(x => { const { m, d } = md(x.date); return `<button type="button" class="bk-day" data-day="${x.date}" aria-pressed="${x.date === cur.date}">${m}/${d}<small>（${wd(x.date)}）</small></button>`; }).join('')}</div>
+        <p class="bk-h">2. 時間を選ぶ<small>${st.minutes}分間</small></p>
+        <div class="bk-times">${cur.slots.map(t => `<button type="button" class="bk-time" data-time="${t}">${t}</button>`).join('')}</div>`;
+      const on = book.querySelector('.bk-day[aria-pressed="true"]');
+      if (on) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
       return;
     }
-    const box = document.createElement('div');
-    box.id = 'timerex_calendar'; box.dataset.url = url;
-    book.appendChild(box);
-    loadScript().then(() => window.TimerexCalendar && window.TimerexCalendar({
-      onBookingComplete: () => { location.href = 'thanks.html?type=book&way=' + way; }
-    })).catch(() => {
-      book.innerHTML = '<p class="book__wait">予約カレンダーを読み込めませんでした。<br>時間をおいて開き直すか、「申し込む」からご連絡ください。</p>';
-    });
+    const v = k => esc(st.input[k] || '');
+    const phone = st.way === 'phone';
+    book.innerHTML = `<div class="bk-sel"><p><small>${phone ? 'お電話' : 'オンライン（Google Meet）'}</small>${(() => { const { m, d } = md(st.day); return `${m}月${d}日（${wd(st.day)}）<br>${st.time}〜${addMin(st.time, st.minutes)}`; })()}</p><button type="button" data-act="back">日時を変える</button></div>${err}
+      <form class="form bk-form" novalidate>
+        <label>会社名<em>必須</em><input type="text" name="company" autocomplete="organization" maxlength="100" required value="${v('company')}"></label>
+        <label>お名前<em>必須</em><input type="text" name="name" autocomplete="name" maxlength="60" required value="${v('name')}"></label>
+        <label>メールアドレス<em>必須</em><input type="email" name="email" autocomplete="email" maxlength="200" required value="${v('email')}"></label>
+        <label>電話番号${phone ? '<em>必須</em>' : ''}<input type="tel" name="tel" autocomplete="tel" maxlength="30" ${phone ? 'required' : ''} value="${v('tel')}"></label>
+        <label>相談したいこと<textarea name="note" rows="3" maxlength="1000" placeholder="売りたいサービスや、送りたい相手など">${v('note')}</textarea></label>
+        <label>特典コード<input type="text" name="code" autocomplete="off" maxlength="30" placeholder="チラシをお持ちの方のみ" value="${v('code')}"></label>
+        <label class="bk-hp" aria-hidden="true">ホームページ<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+        <label class="form__agree"><input type="checkbox" name="agree" required ${st.input.agree ? 'checked' : ''}><span><a href="privacy.html">プライバシーポリシー</a>に同意する</span></label>
+        <button class="btn btn--fire" type="submit">この日時で予約する</button>
+        <p class="form__note">${phone ? 'ご予約の日時に、こちらからお電話します。' : 'Google Meetのリンクを、招待メールでお送りします。'}</p>
+      </form>`;
   };
-  ways.forEach(b => b.addEventListener('click', () => render(b.dataset.way)));
-  render('online');
+
+  const keep = () => {
+    const f = book.querySelector('.bk-form');
+    if (!f) return;
+    ['company', 'name', 'email', 'tel', 'note', 'code'].forEach(k => { st.input[k] = f.elements[k].value; });
+    st.input.agree = f.elements.agree.checked;
+  };
+
+  const check = f => {
+    const g = k => f.elements[k].value.trim();
+    if (!g('company') || !g('name')) return '会社名とお名前を入れてください。';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g('email'))) return 'メールアドレスを確かめてください。';
+    if (st.way === 'phone' && g('tel').replace(/\D/g, '').length < 10) return 'お電話の相談は、電話番号を入れてください。';
+    if (!f.elements.agree.checked) return 'プライバシーポリシーへの同意が必要です。';
+    return '';
+  };
+
+  book.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b || !book.contains(b)) return;
+    if (b.dataset.day) { st.day = b.dataset.day; st.msg = ''; draw(); }
+    else if (b.dataset.time) { st.time = b.dataset.time; st.msg = ''; draw(); book.scrollIntoView({ block: 'start', behavior: 'smooth' }); }
+    else if (b.dataset.act === 'back') { keep(); st.time = null; st.msg = ''; draw(); }
+    else if (b.dataset.act === 'apply') toApply();
+    else if (b.dataset.act === 'retry') { st.days = null; draw(); }
+  });
+
+  book.addEventListener('submit', e => {
+    e.preventDefault();
+    const f = e.target;
+    keep();
+    const bad = check(f);
+    if (bad) { st.msg = bad; draw(); return; }
+    const btn = f.querySelector('button[type="submit"]');
+    btn.disabled = true; btn.textContent = '予約しています…';
+    const body = { way: st.way, date: st.day, time: st.time, agree: true, website: f.elements.website.value };
+    ['company', 'name', 'email', 'tel', 'note', 'code'].forEach(k => { body[k] = f.elements[k].value.trim(); });
+    fetch(api, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+      .then(r => r.json()).then(j => {
+        if (j.ok) { location.href = `thanks.html?type=book&way=${st.way}&at=${encodeURIComponent(when(st.day, st.time))}`; return; }
+        st.msg = j.error || '予約できませんでした。もう一度お試しください。';
+        if (j.taken) { st.time = null; st.days = null; load().then(() => { st.msg = j.error; draw(); }); return; }
+        draw();
+      })
+      .catch(() => { st.msg = '通信できませんでした。電波のよい所でもう一度お試しください。'; draw(); });
+  });
+
+  ways.forEach(b => b.addEventListener('click', () => {
+    keep();
+    st.way = b.dataset.way; st.msg = '';
+    ways.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    draw();
+  }));
+  // 空き日時は、予約欄が近づいてから読み込む（ページを開いただけで予約ツールを呼ばない）
+  if (api && 'IntersectionObserver' in window) {
+    book.innerHTML = '<p class="book__wait">空いている日時を読み込んでいます…</p>';
+    const io = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting)) { io.disconnect(); draw(); } }, { rootMargin: '800px 0px' });
+    io.observe(book);
+  } else draw();
 })();

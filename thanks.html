@@ -15,7 +15,7 @@
 <link rel="preload" href="assets/fonts/yuji.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap">
-<link rel="stylesheet" href="assets/lp.css?v=23">
+<link rel="stylesheet" href="assets/lp.css?v=24">
 <link rel="stylesheet" href="assets/sub.css">
 <style>
 .thx{position:relative;padding:44px 18px 40px;text-align:center}
@@ -55,14 +55,18 @@
   </section>
 </div>
 <script>
-/* 無料相談の予約（TimeRex）から来たときは、予約用の文面に替える */
+/* 無料相談の予約から来たときは、予約用の文面に替える */
 (() => {
   const q = new URLSearchParams(location.search);
   if (q.get('type') !== 'book') return;
-  const way = q.get('way') === 'phone' ? 'お電話' : 'Web会議';
+  const phone = q.get('way') === 'phone';
+  const way = phone ? 'お電話' : 'Web会議';
+  const at = (q.get('at') || '').replace(/[<>&"']/g, '');
   document.title = 'ご予約ありがとうございます｜一通入魂';
   document.getElementById('thxH').innerHTML = '無料相談のご予約、<br><span class="brush fire-txt">ありがとう<br>ございます</span>';
-  document.getElementById('thxMsg').innerHTML = `ご予約の日時に、${way}でご相談をうかがいます。<br>予約の内容は、確認のメールでもお知らせします。`;
+  document.getElementById('thxMsg').innerHTML = (at ? `<b>${at}</b><br>` : '') + (phone
+    ? 'ご予約の日時に、ご入力の番号へこちらからお電話します。<br>予定は、Googleカレンダーの招待メールでもお送りしました。'
+    : 'ご予約の日時に、Google Meetでご相談をうかがいます。<br>参加用のリンクは、Googleカレンダーの招待メールでお送りしました。');
   document.getElementById('thxSteps').innerHTML = `
       <li><b>01</b><span>ご予約完了</span></li>
       <li class="is-now"><b>02</b><span><em>いまここ</em>予約の日時まで少々お待ちください</span></li>
@@ -70,7 +74,7 @@
       <li><b>04</b><span>LPチラシ制作 → 宛名を手書き → 投函</span></li>`;
 })();
 </script>
-<script src="assets/lp.js?v=13"></script>
+<script src="assets/lp.js?v=14"></script>
 <script src="assets/fx.js?v=4"></script>
 </body>
 </html>
