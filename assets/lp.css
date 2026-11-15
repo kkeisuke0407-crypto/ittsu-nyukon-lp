@@ -103,6 +103,9 @@ a{color:inherit}
 .seal--brush b{display:block;font:400 italic 44px/1 var(--head);letter-spacing:-.065em}
 .seal--brush .seal__yen{position:absolute;right:0;bottom:1px;font:900 14px/1 var(--f);letter-spacing:0}
 .seal--brush em{position:absolute;bottom:0;left:18px;right:10px;margin:0;padding:3px 4px 4px;border-radius:1px;background:#fff;color:var(--ink);font:900 12px/1.15 var(--f);letter-spacing:0;text-align:center;white-space:nowrap}
+.seal--brush .seal__tax{position:absolute;right:9px;bottom:-15px;font:700 10px/1 var(--f);white-space:nowrap}
+.seal--side.seal--brush{position:relative;flex:none;margin-bottom:11px;animation:none}
+@media (min-width:1024px) and (max-height:720px){.side--l{gap:9px;padding-block:20px;overflow-y:auto;justify-content:flex-start}}
 @keyframes brushPriceIn{from{opacity:0;transform:scale(.78) rotate(-4deg)}to{opacity:1;transform:scale(1) rotate(0)}}
 
 /* ---------- ヘッダー ---------- */
