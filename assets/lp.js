@@ -1,3 +1,66 @@
+/* アクセス数を数える。送り先は予約ツール（../予約ツール_GAS）のウェブアプリ。
+   経路：URLの ?from=qr などの目印。目印がなければ、ほかのサイトから来たら web、直接なら direct。
+   最初の経路を30日おぼえて、予約・申し込みにも付ける（集計は stats.html で見る）。
+   ?nocount=1 を一度開いた端末は「test」として分けて数える（自分の確認用）。?nocount=0 で元に戻す */
+const ITTSU = (() => {
+  const API = 'https://script.google.com/macros/s/AKfycbxBJRm_ohJWD63o2AXTjYe5XmsFrlkCXiPk_2QnOeM6-oOwxNugMeikpqdvQPATlssT/exec';
+  const q = new URLSearchParams(location.search);
+  const ls = {
+    get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: (k, v) => { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* 保存できない端末はそのまま */ } },
+  };
+  const local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  const api = (local && q.get('bookapi')) || API;
+  if (q.has('nocount')) ls.set('ittsu_nocount', q.get('nocount') === '0' ? null : '1');
+  const test = ls.get('ittsu_nocount') === '1';
+
+  let src = (q.get('from') || '').toLowerCase();
+  if (!/^[a-z0-9_-]{1,20}$/.test(src)) src = '';
+  if (q.has('from') || q.has('nocount')) {
+    // 目印はURLから消す（ブックマークや共有で、同じ目印が数えられ続けないように）
+    q.delete('from'); q.delete('nocount');
+    const s = q.toString();
+    history.replaceState(null, '', location.pathname + (s ? '?' + s : '') + location.hash);
+  }
+  let saved = null;
+  try { saved = JSON.parse(ls.get('ittsu_src') || 'null'); } catch (e) { saved = null; }
+  if (src) ls.set('ittsu_src', JSON.stringify({ src, t: Date.now() }));
+  else if (saved && Date.now() - saved.t < 30 * 864e5) src = saved.src;
+  else {
+    const r = document.referrer;
+    src = r && r.indexOf(location.origin) !== 0 ? 'web' : 'direct';
+    ls.set('ittsu_src', JSON.stringify({ src, t: Date.now() }));
+  }
+  if (test) src = 'test';
+
+  const send = (ev, extra) => {
+    if (navigator.webdriver && !local) return; // 自動で動くブラウザ（巡回ロボットなど）は数えない
+    const body = JSON.stringify(Object.assign({ kind: 'hit', ev, src }, extra || {}));
+    try {
+      if (navigator.sendBeacon && navigator.sendBeacon(api, body)) return;
+      fetch(api, { method: 'POST', body, keepalive: true, headers: { 'Content-Type': 'text/plain;charset=utf-8' } }).catch(() => {});
+    } catch (e) { /* 数えられなくてもページは動かす */ }
+  };
+
+  // トップページを開いた回数と、その日はじめての訪問か
+  const contact = document.getElementById('contact');
+  if (contact) {
+    const today = new Date().toLocaleDateString('sv'); // この端末の日付（YYYY-MM-DD）
+    const first = ls.get('ittsu_day') !== today;
+    ls.set('ittsu_day', today);
+    send('pv', { u: first ? 1 : 0 });
+    // 予約・申し込み欄まで見たか（1回の訪問で1回だけ）
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(es => {
+        if (!es.some(x => x.isIntersecting)) return;
+        io.disconnect(); send('contact');
+      }, { threshold: 0.15 });
+      io.observe(contact);
+    }
+  }
+  return { src };
+})();
+
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const $ = (s, r = document) => r.querySelector(s);
@@ -186,7 +249,7 @@ document.querySelectorAll('form[data-apply]').forEach(f => {
     if (!api) { say('申し込みの受付は準備中です。お手数ですが「無料相談を予約」からご連絡ください。'); return; }
     say('');
     btn.disabled = true; btn.textContent = '送信しています…';
-    const body = { kind: 'apply', agree: true, website: g('website') };
+    const body = { kind: 'apply', agree: true, website: g('website'), src: ITTSU.src };
     ['company', 'name', 'email', 'tel', 'volume', 'plan', 'list', 'when', 'code', 'note'].forEach(k => { body[k] = g(k); });
     fetch(api, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
       .then(r => r.json()).then(j => {
@@ -316,7 +379,7 @@ document.querySelectorAll('form[data-apply]').forEach(f => {
     if (bad) { st.msg = bad; draw(); return; }
     const btn = f.querySelector('button[type="submit"]');
     btn.disabled = true; btn.textContent = '予約しています…';
-    const body = { way: st.way, date: st.day, time: st.time, agree: true, website: f.elements.website.value };
+    const body = { way: st.way, date: st.day, time: st.time, agree: true, website: f.elements.website.value, src: ITTSU.src };
     ['company', 'name', 'email', 'tel', 'note', 'code'].forEach(k => { body[k] = f.elements[k].value.trim(); });
     fetch(api, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
       .then(r => r.json()).then(j => {

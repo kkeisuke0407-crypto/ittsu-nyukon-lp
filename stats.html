@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>アクセス数｜一通入魂</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<meta name="theme-color" content="#160e0b">
+<link rel="preload" href="assets/fonts/dela.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap">
+<link rel="stylesheet" href="assets/lp.css?v=25">
+<link rel="stylesheet" href="assets/sub.css">
+<style>
+.st{padding:28px 14px 60px}
+.st h1{font:400 24px/1.4 var(--head);text-align:center}
+.st__lead{margin-top:6px;text-align:center;font-size:12.5px;font-weight:700;color:var(--mute)}
+.st__range{display:flex;justify-content:center;gap:6px;margin-top:16px}
+.st__range button{padding:7px 14px;border:2px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);font:900 13px var(--f);cursor:pointer}
+.st__range button[aria-pressed="true"]{border-color:var(--fire1);background:#fff1e0;color:var(--fire1)}
+.st__cards{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:16px}
+.st__card{padding:12px;border:2px solid var(--ink);border-radius:10px;background:#fff}
+.st__card p{font-size:11.5px;font-weight:900;color:var(--mute)}
+.st__card b{display:block;margin-top:2px;font:400 28px/1.1 var(--num);color:var(--ink)}
+.st__card small{font-size:11px;font-weight:700;color:var(--mute)}
+.st__card--qr{border-color:var(--fire1)}
+.st__card--qr b{color:var(--fire1)}
+.st h2{margin-top:26px;padding-left:10px;border-left:5px solid var(--fire1);font-weight:900;font-size:16px}
+.st__wrap{margin-top:10px;overflow-x:auto;border:2px solid var(--ink);border-radius:10px;background:#fff}
+.st table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
+.st th,.st td{padding:8px 9px;border-bottom:1px solid var(--line);text-align:right}
+.st th:first-child,.st td:first-child{text-align:left}
+.st thead th{background:#f6ecd8;font-weight:900;font-size:11.5px}
+.st tbody tr:last-child td{border-bottom:0}
+.st tr.is-qr td{background:#fff6ec;font-weight:900}
+.st tr.is-test td{color:var(--mute)}
+.st__note{margin-top:10px;font-size:11.5px;line-height:1.8;color:var(--mute)}
+.st__key{display:grid;gap:8px;max-width:320px;margin:20px auto 0}
+.st__key input{height:48px;padding:0 12px;border:2px solid var(--line);border-radius:8px;font:700 16px var(--f)}
+.st__key button{height:48px;border:0;border-radius:8px;background:var(--fire1);color:#fff;font:900 15px var(--f);cursor:pointer}
+.st__msg{margin-top:14px;text-align:center;font-weight:700;font-size:13px;color:var(--mute)}
+</style>
+</head>
+<body>
+<div class="sub washi">
+  <header class="hd"><a class="logo" href="index.html"><span class="logo__mark" aria-hidden="true"></span>一通入魂</a></header>
+  <main class="st">
+    <h1>アクセス数</h1>
+    <p class="st__lead">サイトに来た人の数と、どこから来たか</p>
+    <div id="app"><p class="st__msg">読み込んでいます…</p></div>
+  </main>
+</div>
+<script>
+/* 集計は予約ツール（../予約ツール_GAS）が持っている。合言葉はURLの # のあと（#k=…）か、この画面で入れたもの */
+(() => {
+  const API = 'https://script.google.com/macros/s/AKfycbxBJRm_ohJWD63o2AXTjYe5XmsFrlkCXiPk_2QnOeM6-oOwxNugMeikpqdvQPATlssT/exec';
+  const local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  const api = (local && new URLSearchParams(location.search).get('bookapi')) || API;
+  const app = document.getElementById('app');
+  const ls = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
+  const hashKey = (location.hash.match(/k=([^&]+)/) || [])[1];
+  if (hashKey) { ls.set('ittsu_stats_key', decodeURIComponent(hashKey)); history.replaceState(null, '', location.pathname + location.search); }
+  const NAMES = { qr: 'チラシのQR', direct: '直接（URL入力・ブックマーク）', web: '検索・ほかのサイト', test: '自分の確認（数えない端末）' };
+  const name = s => NAMES[s] || ('目印：' + s);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const F = ['uu', 'pv', 'contact', 'book', 'apply'];
+  const HEAD = ['訪問者', '表示回数', '予約欄まで', '予約', '申し込み'];
+  let data = null, range = 7;
+
+  const askKey = msg => {
+    app.innerHTML = `<form class="st__key"><p class="st__msg">${msg}</p><input type="password" name="k" placeholder="合言葉" autocomplete="off" required><button type="submit">見る</button></form>`;
+    app.querySelector('form').addEventListener('submit', e => { e.preventDefault(); ls.set('ittsu_stats_key', e.target.k.value.trim()); load(); });
+  };
+
+  const load = () => {
+    const key = ls.get('ittsu_stats_key');
+    if (!key) { askKey('合言葉を入れてください。'); return; }
+    app.innerHTML = '<p class="st__msg">読み込んでいます…</p>';
+    fetch(`${api}?stats=${encodeURIComponent(key)}`, { cache: 'no-store' }).then(r => r.json()).then(j => {
+      if (!j.ok) { askKey(esc(j.error || '読み込めませんでした。')); return; }
+      data = j.days || {}; draw();
+    }).catch(() => { app.innerHTML = '<p class="st__msg">読み込めませんでした。時間をおいて開き直してください。</p>'; });
+  };
+
+  const ymd = d => d.toLocaleDateString('sv', { timeZone: 'Asia/Tokyo' });
+  const draw = () => {
+    const today = new Date();
+    const from = range ? ymd(new Date(today.getTime() - (range - 1) * 864e5)) : '0000';
+    const dates = Object.keys(data).filter(d => d >= from).sort().reverse();
+    const bySrc = {}, byDay = {};
+    const add = (o, row) => F.forEach(k => { o[k] = (o[k] || 0) + (row[k] || 0); });
+    dates.forEach(d => Object.keys(data[d]).forEach(s => {
+      add(bySrc[s] || (bySrc[s] = {}), data[d][s]);
+      if (s !== 'test') add(byDay[d] || (byDay[d] = {}), data[d][s]);
+      if (s === 'qr') (byDay[d] || (byDay[d] = {})).qr = (byDay[d].qr || 0) + (data[d][s].uu || 0);
+    }));
+    const total = {}; Object.keys(bySrc).filter(s => s !== 'test').forEach(s => add(total, bySrc[s]));
+    const qr = bySrc.qr || {};
+    const order = ['qr', 'direct', 'web'].concat(Object.keys(bySrc).filter(s => !['qr', 'direct', 'web', 'test'].includes(s)).sort()).concat(bySrc.test ? ['test'] : []).filter(s => bySrc[s]);
+    const n = v => (v || 0).toLocaleString();
+    app.innerHTML = `
+      <div class="st__range" role="group" aria-label="期間">${[[7, '7日'], [30, '30日'], [90, '90日'], [0, 'すべて']].map(([v, l]) => `<button type="button" data-r="${v}" aria-pressed="${v === range}">${l}</button>`).join('')}</div>
+      <div class="st__cards">
+        <div class="st__card"><p>訪問者</p><b>${n(total.uu)}</b><small>表示 ${n(total.pv)}回</small></div>
+        <div class="st__card st__card--qr"><p>チラシのQRから</p><b>${n(qr.uu)}</b><small>表示 ${n(qr.pv)}回</small></div>
+        <div class="st__card"><p>予約</p><b>${n(total.book)}</b><small>うちQR ${n(qr.book)}</small></div>
+        <div class="st__card"><p>申し込み</p><b>${n(total.apply)}</b><small>うちQR ${n(qr.apply)}</small></div>
+      </div>
+      <h2>どこから来たか</h2>
+      <div class="st__wrap"><table><thead><tr><th>経路</th>${HEAD.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>
+        ${order.length ? order.map(s => `<tr class="${s === 'qr' ? 'is-qr' : ''} ${s === 'test' ? 'is-test' : ''}"><td>${esc(name(s))}</td>${F.map(k => `<td>${n(bySrc[s][k])}</td>`).join('')}</tr>`).join('') : `<tr><td colspan="6">この期間の記録はありません</td></tr>`}
+      </tbody></table></div>
+      <h2>日ごと</h2>
+      <div class="st__wrap"><table><thead><tr><th>日付</th><th>訪問者</th><th>うちQR</th><th>表示回数</th><th>予約欄まで</th><th>予約</th><th>申し込み</th></tr></thead><tbody>
+        ${dates.length ? dates.filter(d => byDay[d]).map(d => { const r = byDay[d]; const [, m, dd] = d.split('-').map(Number); return `<tr><td>${m}/${dd}</td><td>${n(r.uu)}</td><td>${n(r.qr)}</td><td>${n(r.pv)}</td><td>${n(r.contact)}</td><td>${n(r.book)}</td><td>${n(r.apply)}</td></tr>`; }).join('') : `<tr><td colspan="7">この期間の記録はありません</td></tr>`}
+      </tbody></table></div>
+      <p class="st__note">訪問者は、同じ端末の同じ日の訪問を1人として数えています。経路は最初に来たときのものを30日おぼえて、予約・申し込みにも付けています。「自分の確認」は合計に入れていません（?nocount=1 を開いた端末）。</p>`;
+    app.querySelectorAll('[data-r]').forEach(b => b.addEventListener('click', () => { range = +b.dataset.r; draw(); }));
+  };
+  load();
+})();
+</script>
+</body>
+</html>
