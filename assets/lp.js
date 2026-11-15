@@ -1,5 +1,4 @@
 (() => {
-  document.documentElement.classList.add('js');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
@@ -30,8 +29,9 @@
   $$('[data-tags]').forEach(t => { const one = t.dataset.tags.split('|').map(s => `<span>${s}</span>`).join(''); t.innerHTML = one + one; });
 
   /* スクロールで表示 */
+  /* 速いスクロールで一気に通り過ぎた要素（すでに画面より上）も表示済みにする */
   const io = new IntersectionObserver(es => es.forEach(e => {
-    if (!e.isIntersecting) return;
+    if (!e.isIntersecting && e.boundingClientRect.top > 0) return;
     e.target.classList.add('is-in');
     io.unobserve(e.target);
   }), { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
@@ -66,6 +66,13 @@
     $$('[data-dir]', root).forEach(b => b.addEventListener('click', () => { go(cur + +b.dataset.dir); restart(); }));
     ['pointerdown', 'touchstart', 'wheel'].forEach(ev => track.addEventListener(ev, restart, { passive: true }));
     new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(root);
+    /* 横に並んだ画像は画面外のまま遅延読み込みが進まないので、カルーセルが近づいたらまとめて読む */
+    const pre = new IntersectionObserver(es => {
+      if (!es[0].isIntersecting) return;
+      pre.disconnect();
+      $$('img[loading="lazy"]', root).forEach(img => { img.loading = 'eager'; });
+    }, { rootMargin: '600px 0px' });
+    pre.observe(root);
     addEventListener('resize', () => track.scrollTo({ left: center(cur) }));
     requestAnimationFrame(() => { track.scrollTo({ left: center(0) }); mark(); });
     restart();
@@ -73,9 +80,9 @@
   /* LPチラシ見本：samples/samples.js から10枚のカードを作る。押すとA4の紙面を拡大表示 */
   const wt = $('#worksTrack');
   if (wt && window.SAMPLES) {
-    const src = s => `samples/img/${s.id}.jpg`;
+    const src = s => `samples/img/${s.id}.webp`;
     wt.innerHTML = SAMPLES.map((s, i) => `<button type="button" class="wcard" data-i="${i}" aria-label="${s.ind}の見本を拡大して見る">
-      <span class="wcard__view"><img src="samples/img/thumb/${s.id}.jpg" alt="" loading="lazy" decoding="async"><i class="wcard__zoom" aria-hidden="true"></i></span>
+      <span class="wcard__view"><img src="samples/img/thumb/${s.id}.webp" alt="" width="440" height="622" loading="lazy" decoding="async"><i class="wcard__zoom" aria-hidden="true"></i></span>
       <span class="wcard__no">SAMPLE ${String(i + 1).padStart(2, '0')}</span>
       <span class="wcard__ind">${s.ind}</span>
       <span class="wcard__h">${s.h1.replace(/<br>/g, '')}</span></button>`).join('');
@@ -149,13 +156,6 @@
 
 })();
 
-/* キャラ画像：assets/img/<data-img>.png を置くと、枠が画像に替わる（無ければ枠のまま） */
-document.querySelectorAll('.char[data-img]').forEach(el => {
-  const img = new Image();
-  img.alt = ''; img.width = 690; img.height = 941; img.decoding = 'async';
-  img.onload = () => { const s = el.querySelector('.slot'); if (s) s.replaceWith(img); else el.append(img); };
-  img.src = `assets/img/${el.dataset.img}.png`;
-});
 /* ヤギ（FV・中間CTA・固定ボタン）：タップ（クリック）すると大きく跳ねる */
 document.querySelectorAll('.char--hero, .char--must, .stick__goat').forEach(el => {
   el.addEventListener('click', () => {
@@ -163,35 +163,6 @@ document.querySelectorAll('.char--hero, .char--must, .stick__goat').forEach(el =
   });
   el.addEventListener('animationend', e => { if (e.animationName === 'hop') el.classList.remove('is-hop'); });
 });
-
-/* 画像枠：data-src のファイルを置くと、枠が画像に替わる（無ければ枠のまま）。
-   枠の種類（slot--env など）は ph--env として画像に引き継ぎ、縦横比と見た目をそろえる */
-/* 画面に近づいた枠から読み込む（ページ外の Image に loading=lazy を付けると読み込まれないため、自前で遅延） */
-(() => {
-  const swap = s => {
-    const img = new Image();
-    img.decoding = 'async';
-    img.onload = () => {
-      img.alt = s.dataset.alt || '';
-      img.width = img.naturalWidth; img.height = img.naturalHeight;
-      img.className = ['ph', ...[...s.classList].filter(c => c.startsWith('slot--')).map(c => 'ph--' + c.slice(6))].join(' ');
-      s.replaceWith(img);
-    };
-    img.src = s.dataset.src;
-  };
-  /* 横スクロールの中の枠は画面外のまま交差しないので、セクション単位で見て、近づいたら中の枠をまとめて読む */
-  const groups = new Map();
-  document.querySelectorAll('.slot[data-src]').forEach(s => {
-    const g = s.closest('section') || s.parentElement;
-    if (!groups.has(g)) groups.set(g, []);
-    groups.get(g).push(s);
-  });
-  if (!('IntersectionObserver' in window)) { groups.forEach(list => list.forEach(swap)); return; }
-  const io = new IntersectionObserver(es => es.forEach(e => {
-    if (e.isIntersecting) { io.unobserve(e.target); groups.get(e.target).forEach(swap); }
-  }), { rootMargin: '800px 0px' });
-  groups.forEach((_, g) => io.observe(g));
-})();
 
 /* フォームの送信先は未設定（決まったら action を設定してこの処理を外す） */
 document.querySelectorAll('form[data-placeholder]').forEach(f => f.addEventListener('submit', e => {

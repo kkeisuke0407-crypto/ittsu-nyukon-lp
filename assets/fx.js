@@ -10,8 +10,26 @@
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
 
   /* 見えている間だけ動かす */
-  const vis = new WeakMap();
-  const vio = new IntersectionObserver(es => es.forEach(e => vis.set(e.target, e.isIntersecting)), { rootMargin: '100px' });
+  /* 画面外に出たら描画ループごと止め、戻ってきたら再開する（スマホの電池とCPUを使わない） */
+  const vis = new WeakMap(), kick = new WeakMap();
+  const vio = new IntersectionObserver(es => es.forEach(e => {
+    vis.set(e.target, e.isIntersecting);
+    if (e.isIntersecting && kick.has(e.target)) kick.get(e.target)();
+  }), { rootMargin: '100px' });
+  /* 要素ごとの描画ループ。draw(now) を毎コマ呼び、見えなくなったら止まる */
+  function loop(el, draw) {
+    let running = false;
+    const frame = now => {
+      if (vis.get(el) === false) { running = false; return; }
+      draw(now);
+      if (reduce) { running = false; return; }
+      requestAnimationFrame(frame);
+    };
+    const start = () => { if (running) return; running = true; requestAnimationFrame(frame); };
+    kick.set(el, start);
+    vio.observe(el);
+    start();
+  }
 
   /* ---------- 炎（WebGL） ---------- */
   const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
@@ -67,17 +85,12 @@ void main(){
       gl.viewport(0, 0, cv.width, cv.height); gl.uniform2f(ur, cv.width, cv.height);
     }
     size(); addEventListener('resize', size);
-    vio.observe(el);
     const t0 = performance.now() - Math.random() * 10000;
-    function frame(now) {
-      if (vis.get(el) !== false) {
-        gl.uniform1f(ut, (now - t0) / 1000);
-        gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      }
-      if (!reduce) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
+    loop(el, now => {
+      gl.uniform1f(ut, (now - t0) / 1000);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    });
   }
 
   /* ---------- 火の粉（Canvas 2D） ---------- */
@@ -109,11 +122,10 @@ void main(){
     }
     size(); addEventListener('resize', size);
     for (let i = 0; i < count; i++) ps.push(spawn({}, true));
-    vio.observe(el);
     let last = performance.now();
-    function frame(now) {
+    loop(el, now => {
       const dt = Math.min(.05, (now - last) / 1000); last = now;
-      if (vis.get(el) !== false) {
+      {
         g.clearRect(0, 0, W, H);
         g.globalCompositeOperation = 'lighter';
         for (const p of ps) {
@@ -128,9 +140,7 @@ void main(){
         }
         g.globalAlpha = 1;
       }
-      if (!reduce) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
+    });
   }
 
   document.querySelectorAll('[data-fx="fire"]').forEach(initFire);
