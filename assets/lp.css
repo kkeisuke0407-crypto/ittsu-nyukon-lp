@@ -95,19 +95,20 @@ a{color:inherit}
 .seal em{margin-top:2px;padding:1px 6px;border-radius:3px;background:#fff;color:var(--red);font-style:normal;font-weight:900;font-size:10px}
 .seal--side{width:120px;height:120px;animation:none}
 
-/* 値札（B案）：生成りの荷札。左の穴を軸に、ゆれながら下がってくる */
-.seal--tag{--r:-8deg;--w:clamp(84px,25vw,100px);position:relative;display:block;width:var(--w);height:auto;padding:calc(var(--w)*.07) 6px calc(var(--w)*.07) calc(var(--w)*.19);border-radius:0;background:var(--washi);color:var(--ink);box-shadow:none;clip-path:polygon(10px 0,100% 0,100% 100%,10px 100%,0 calc(100% - 10px),0 10px);text-align:left;line-height:1;transform:rotate(var(--r));transform-origin:8px 50%;animation:tagIn .7s 1.75s cubic-bezier(.3,.6,.4,1) both}
-.seal--tag::before{content:"";position:absolute;left:calc(var(--w)*.07);top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:var(--sumi);box-shadow:0 0 0 2px var(--gold)}
-.seal--tag span,.seal--tag b,.seal--tag em{letter-spacing:0;font-style:normal}
-.seal--tag .seal__unit{display:block;font:900 calc(var(--w)*.1)/1 var(--f);color:var(--mute)}
-.seal--tag .seal__amount{display:flex;align-items:baseline;gap:1px;margin-top:1px;white-space:nowrap}
-.seal--tag b{font:400 calc(var(--w)*.32)/1 var(--num);color:var(--red)}
-.seal--tag .seal__yen{font:900 calc(var(--w)*.11)/1 var(--f)}
-.seal--tag em{display:block;margin:calc(var(--w)*.04) 0 0;padding:calc(var(--w)*.045) 0 0;border-top:1.5px dashed #c9b391;border-radius:0;background:none;color:var(--red);font:900 calc(var(--w)*.1)/1 var(--f);white-space:nowrap}
-.seal--tag .seal__tax{display:block;margin-top:4px;font:700 10px/1 var(--f);color:var(--mute)}
-.seal--side.seal--tag{--r:-5deg;--w:140px;flex:none;margin:4px 0 6px;animation:none}
-.seal--side.seal--tag em{font-size:12px}
-@keyframes tagIn{0%{opacity:0;transform:translateY(-14px) rotate(-30deg)}45%{opacity:1;transform:rotate(4deg)}72%{transform:rotate(calc(var(--r) - 4deg))}100%{opacity:1;transform:rotate(var(--r))}}
+/* 値札：ヤギのセリフ（炎色の吹き出し）。しっぽは右下のヤギに向ける */
+.seal--bubble{--w:clamp(76px,24vw,96px);position:relative;display:grid;grid-template-columns:auto auto;justify-content:center;align-items:baseline;column-gap:3px;width:auto;height:auto;padding:calc(var(--w)*.09) calc(var(--w)*.11);border-radius:14px;background:var(--fire);color:#fff;box-shadow:0 0 16px rgba(255,100,0,.55),0 6px 12px rgba(0,0,0,.4);text-align:center;line-height:1;transform:none;transform-origin:100% 100%;animation:bubIn .5s 1.75s cubic-bezier(.3,0,.3,1.4) both}
+.seal--bubble::after{content:"";position:absolute;right:12px;bottom:-12px;width:20px;height:13px;background:#ffb62f;clip-path:polygon(0 0,62% 0,100% 100%)}
+.seal--bubble span,.seal--bubble b,.seal--bubble em{letter-spacing:0;font-style:normal}
+.seal--bubble .seal__unit{grid-column:1;font:900 calc(var(--w)*.11)/1 var(--f)}
+.seal--bubble .seal__amount{grid-column:2;display:flex;align-items:baseline;gap:1px;white-space:nowrap}
+.seal--bubble b{font:400 calc(var(--w)*.32)/1 var(--num);color:#fff;text-shadow:0 2px 0 rgba(120,20,0,.35)}
+.seal--bubble .seal__yen{font:900 calc(var(--w)*.11)/1 var(--f)}
+.seal--bubble em{grid-column:1/-1;justify-self:center;margin:calc(var(--w)*.03) 0 0;padding:3px 8px 2px;border-radius:99px;background:#fff;color:var(--fire1);font:900 calc(var(--w)*.1)/1 var(--f);white-space:nowrap}
+.seal--bubble .seal__tax{grid-column:1/-1;margin-top:4px;font:700 10px/1 var(--f)}
+.seal--side.seal--bubble{--w:130px;flex:none;margin:4px 0 6px;animation:none}
+.seal--side.seal--bubble::after{display:none}
+.seal--side.seal--bubble em{font-size:12px}
+@keyframes bubIn{0%{opacity:0;transform:scale(.3)}70%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
 @media (min-width:1024px) and (max-height:720px){.side--l{gap:9px;padding-block:20px;overflow-y:auto;justify-content:flex-start}}
 
 /* ---------- ヘッダー ---------- */
@@ -131,7 +132,7 @@ a{color:inherit}
 @keyframes envIn{0%{opacity:0;transform:translate(115%,-30%) rotate(24deg) scale(.3)}55%{opacity:1}75%{transform:translate(-5%,-4%) rotate(-13deg) scale(1.05)}100%{opacity:1;transform:rotate(-8deg)}}
 .char--hero{animation:slideIn .9s .3s cubic-bezier(.2,.9,.2,1) both}
 .fv__stage .seal{position:absolute;right:40%;top:28px;z-index:2;animation-delay:1.75s} /* 封筒が着いてから価格の印を押す */
-.fv__stage .seal--tag{right:38%;top:max(20px,calc(56px - 8vw))}
+.fv__stage .seal--bubble{right:40%;top:max(24px,calc(60px - 8vw))}
 .fv__env,.char--hero{position:relative;z-index:1}
 .fire--fv{left:-16px;right:-16px;top:-40px;bottom:-4px}
 .fire--must{left:-18px;right:-18px;top:0;bottom:-8px}
