@@ -80,9 +80,9 @@
   /* LPチラシ見本：samples/samples.js から10枚のカードを作る。押すとA4の紙面を拡大表示 */
   const wt = $('#worksTrack');
   if (wt && window.SAMPLES) {
-    const src = s => `samples/img/${s.id}.webp`;
+    const src = s => `samples/img/${s.id}.webp?v=3`;
     wt.innerHTML = SAMPLES.map((s, i) => `<button type="button" class="wcard" data-i="${i}" aria-label="${s.ind}の見本を拡大して見る">
-      <span class="wcard__view"><img src="samples/img/thumb/${s.id}.webp" alt="" width="440" height="622" loading="lazy" decoding="async"><i class="wcard__zoom" aria-hidden="true"></i></span>
+      <span class="wcard__view"><img src="samples/img/thumb/${s.id}.webp?v=3" alt="" width="440" height="622" loading="lazy" decoding="async"><i class="wcard__zoom" aria-hidden="true"></i></span>
       <span class="wcard__no">SAMPLE ${String(i + 1).padStart(2, '0')}</span>
       <span class="wcard__ind">${s.ind}</span>
       <span class="wcard__h">${s.h1.replace(/<br>/g, '')}</span></button>`).join('');
