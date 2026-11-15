@@ -95,6 +95,16 @@ a{color:inherit}
 .seal em{margin-top:2px;padding:1px 6px;border-radius:3px;background:#fff;color:var(--red);font-style:normal;font-weight:900;font-size:10px}
 .seal--side{width:120px;height:120px;animation:none}
 
+/* D案：朱色の筆跡と、読みやすい価格・白い込み料金ラベル */
+.seal--brush{isolation:isolate;display:block;width:136px;height:108px;border-radius:0;background:none;box-shadow:none;transform:none;text-align:left;animation:brushPriceIn .45s 1.75s cubic-bezier(.2,.8,.3,1.2) both}
+.seal--brush::before{content:"";position:absolute;inset:5px -7px 10px;z-index:-1;background:url(img/price-brush-d.svg) center/100% 100% no-repeat;pointer-events:none}
+.seal--brush .seal__unit{position:absolute;top:3px;left:27px;font:900 13px/1.1 var(--f);white-space:nowrap}
+.seal--brush .seal__amount{position:absolute;inset:24px 11px auto 15px;height:58px;white-space:nowrap}
+.seal--brush b{display:block;font:400 italic 44px/1 var(--head);letter-spacing:-.065em}
+.seal--brush .seal__yen{position:absolute;right:0;bottom:1px;font:900 14px/1 var(--f);letter-spacing:0}
+.seal--brush em{position:absolute;bottom:0;left:18px;right:10px;margin:0;padding:3px 4px 4px;border-radius:1px;background:#fff;color:var(--ink);font:900 12px/1.15 var(--f);letter-spacing:0;text-align:center;white-space:nowrap}
+@keyframes brushPriceIn{from{opacity:0;transform:scale(.78) rotate(-4deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+
 /* ---------- ヘッダー ---------- */
 .hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--sumi)}
 .hd__cta{padding:7px 16px;border-radius:8px;background:var(--fire);color:#fff;text-decoration:none;font-weight:900;font-size:12.5px;box-shadow:0 4px 12px rgba(255,70,0,.35)}
@@ -116,6 +126,7 @@ a{color:inherit}
 @keyframes envIn{0%{opacity:0;transform:translate(115%,-30%) rotate(24deg) scale(.3)}55%{opacity:1}75%{transform:translate(-5%,-4%) rotate(-13deg) scale(1.05)}100%{opacity:1;transform:rotate(-8deg)}}
 .char--hero{animation:slideIn .9s .3s cubic-bezier(.2,.9,.2,1) both}
 .fv__stage .seal{position:absolute;right:40%;top:28px;z-index:2;animation-delay:1.75s} /* 封筒が着いてから価格の印を押す */
+.fv__stage .seal--brush{right:40%;top:20px}
 .fv__env,.char--hero{position:relative;z-index:1}
 .fire--fv{left:-16px;right:-16px;top:-40px;bottom:-4px}
 .fire--must{left:-18px;right:-18px;top:0;bottom:-8px}
