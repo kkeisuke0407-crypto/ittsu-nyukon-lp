@@ -156,8 +156,8 @@ document.querySelectorAll('.char[data-img]').forEach(el => {
   img.onload = () => { const s = el.querySelector('.slot'); if (s) s.replaceWith(img); else el.append(img); };
   img.src = `assets/img/${el.dataset.img}.png`;
 });
-/* FVのヤギ：タップ（クリック）すると大きく跳ねる */
-document.querySelectorAll('.char--hero').forEach(el => {
+/* ヤギ（FV・中間CTA・固定ボタン）：タップ（クリック）すると大きく跳ねる */
+document.querySelectorAll('.char--hero, .char--must, .stick__goat').forEach(el => {
   el.addEventListener('click', () => {
     el.classList.remove('is-hop'); void el.offsetWidth; el.classList.add('is-hop');
   });
