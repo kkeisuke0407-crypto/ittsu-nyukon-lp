@@ -227,8 +227,9 @@ document.querySelectorAll('.char--hero, .char--must, .stick__goat').forEach(el =
   el.addEventListener('animationend', e => { if (e.animationName === 'hop') el.classList.remove('is-hop'); });
 });
 
-/* 申し込みフォーム。予約と同じ受付（../予約ツール_GAS、#book の data-api）へ送り、受け付けたら thanks.html へ */
-document.querySelectorAll('form[data-apply]').forEach(f => {
+/* 申し込み・問い合わせのフォーム。予約と同じ受付（../予約ツール_GAS、#book の data-api）へ送り、受け付けたら thanks.html へ */
+document.querySelectorAll('form[data-apply], form[data-inquiry]').forEach(f => {
+  const kind = f.hasAttribute('data-inquiry') ? 'inquiry' : 'apply';
   const bookEl = document.getElementById('book');
   const dev = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && new URLSearchParams(location.search).get('bookapi');
   const api = dev || (bookEl && bookEl.dataset.api) || '';
@@ -242,18 +243,20 @@ document.querySelectorAll('form[data-apply]').forEach(f => {
   f.addEventListener('change', () => { if (!msg.hidden) say(''); });
   f.addEventListener('submit', e => {
     e.preventDefault();
-    const bad = !g('company') || !g('name') ? '会社名とお名前を入れてください。'
+    const bad = kind === 'apply' && (!g('company') || !g('name')) ? '会社名とお名前を入れてください。'
+      : kind === 'inquiry' && !g('name') ? 'お名前を入れてください。'
       : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g('email')) ? 'メールアドレスを確かめてください。'
+      : kind === 'inquiry' && !g('note') ? 'お問い合わせ内容を入れてください。'
       : !f.elements.agree.checked ? 'プライバシーポリシーへの同意が必要です。' : '';
     if (bad) { say(bad); return; }
-    if (!api) { say('申し込みの受付は準備中です。お手数ですが「無料相談を予約」からご連絡ください。'); return; }
+    if (!api) { say('受付は準備中です。お手数ですが「無料相談を予約」からご連絡ください。'); return; }
     say('');
     btn.disabled = true; btn.textContent = '送信しています…';
-    const body = { kind: 'apply', agree: true, website: g('website'), src: ITTSU.src };
-    ['company', 'name', 'email', 'tel', 'volume', 'plan', 'list', 'when', 'code', 'note'].forEach(k => { body[k] = g(k); });
+    const body = { kind, agree: true, website: g('website'), src: ITTSU.src };
+    (kind === 'inquiry' ? ['company', 'name', 'email', 'note'] : ['company', 'name', 'email', 'tel', 'volume', 'plan', 'list', 'when', 'code', 'note']).forEach(k => { body[k] = g(k); });
     fetch(api, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
       .then(r => r.json()).then(j => {
-        if (j.ok) { location.href = 'thanks.html?type=apply'; return; }
+        if (j.ok) { location.href = 'thanks.html?type=' + kind; return; }
         say(j.error || '送信できませんでした。もう一度お試しください。');
         btn.disabled = false; btn.textContent = label;
       })
@@ -261,7 +264,7 @@ document.querySelectorAll('form[data-apply]').forEach(f => {
   });
 });
 
-/* 予約・申し込みのタブ。ページ内のボタン（data-open="book" / "apply"）からも切り替える */
+/* 予約・申し込み・問い合わせのタブ。ページ内のボタン（data-open="book" / "apply" / "inquiry"）や、URLの #inquiry からも切り替える */
 (() => {
   const tabs = Array.from(document.querySelectorAll('#ctab [role="tab"]'));
   if (!tabs.length) return;
@@ -280,6 +283,7 @@ document.querySelectorAll('form[data-apply]').forEach(f => {
     });
   });
   document.querySelectorAll('[data-open]').forEach(a => a.addEventListener('click', () => show(a.dataset.open)));
+  if (location.hash === '#inquiry') { show('inquiry'); document.getElementById('ctab').scrollIntoView({ block: 'start' }); }
 
   /* 無料相談の予約。自前の予約ツール（../予約ツール_GAS、Google Apps Script）から空き日時をもらい、
      選んだ枠でGoogleカレンダーに予定を入れる。オンラインはGoogle Meetのリンクが自動で付く。
