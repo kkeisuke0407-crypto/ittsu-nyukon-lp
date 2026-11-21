@@ -4,6 +4,7 @@
      data-w    炎の横幅 0〜1（既定 .5）
      data-h    炎の高さ 0〜1（既定 .8）
    [data-embers="数"] … 光る火の粉を描く（セクション全体）
+   [data-sparks="数"] … 尾を引いて飛ぶ火花を描く（セクション全体。中に炎があればそこから弾ける）
    画面外では止め、「動きを減らす」設定では1コマだけ描く */
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -143,6 +144,82 @@ void main(){
     });
   }
 
+  /* ---------- 火花（Canvas 2D）：速く飛んで尾を引く。ときどき炎のあたりで弾ける ---------- */
+  function initSparks(el) {
+    const cv = document.createElement('canvas');
+    cv.className = 'fx fx--sparks'; cv.setAttribute('aria-hidden', 'true');
+    el.prepend(cv);
+    const g = cv.getContext('2d');
+    let W = 0, H = 0, src = null;
+    const count = +el.dataset.sparks || 30;
+    const ps = [];
+    const fireEl = el.querySelector('[data-fx="fire"]');
+    function size() {
+      const b = el.getBoundingClientRect(); W = b.width; H = b.height;
+      cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); g.setTransform(DPR, 0, 0, DPR, 0, 0);
+      if (fireEl) {
+        const f = fireEl.getBoundingClientRect();
+        src = { x: f.left - b.left + f.width * (+(fireEl.dataset.cx || .5)), y: f.top - b.top + f.height * .75, w: f.width * .35 };
+      }
+    }
+    /* from: 'fire' 炎から / 'burst' 弾ける / それ以外は画面のどこかを横切る */
+    const spawn = (p, from, ox, oy) => {
+      if (from === 'burst') {
+        const a = -Math.PI / 2 + (Math.random() - .5) * 2.6, v = 160 + Math.random() * 260;
+        p.x = ox; p.y = oy; p.vx = Math.cos(a) * v; p.vy = Math.sin(a) * v;
+        p.max = .5 + Math.random() * .7;
+      } else if (from === 'fire' && src) {
+        p.x = src.x + (Math.random() - .5) * src.w; p.y = src.y - Math.random() * 40;
+        p.vx = (Math.random() - .5) * 140; p.vy = -(160 + Math.random() * 260);
+        p.max = .8 + Math.random() * 1.1;
+      } else {
+        p.x = Math.random() * W; p.y = H * (.25 + Math.random() * .8);
+        p.vx = (Math.random() - .5) * 120; p.vy = -(120 + Math.random() * 240);
+        p.max = .7 + Math.random() * 1.2;
+      }
+      p.life = 0; p.w = .8 + Math.random() * 1.6; p.ph = Math.random() * 6.28;
+      p.hot = Math.random() < .35;
+      return p;
+    };
+    size(); addEventListener('resize', size);
+    for (let i = 0; i < count; i++) { const p = spawn({}, Math.random() < .5 ? 'fire' : 'any'); p.life = Math.random() * p.max; ps.push(p); }
+    const bursts = [];
+    let last = performance.now(), nextBurst = last + 600;
+    loop(el, now => {
+      const dt = Math.min(.05, (now - last) / 1000); last = now;
+      /* ときどき炎のあたりでパッと弾ける */
+      if (src && now > nextBurst) {
+        nextBurst = now + 900 + Math.random() * 1600;
+        const ox = src.x + (Math.random() - .5) * src.w * 1.4, oy = src.y - 20 - Math.random() * src.w * .8;
+        for (let i = 0, n = 8 + (Math.random() * 8 | 0); i < n; i++) bursts.push(spawn({}, 'burst', ox, oy));
+      }
+      g.clearRect(0, 0, W, H);
+      g.globalCompositeOperation = 'lighter';
+      g.lineCap = 'round';
+      const draw = (p) => {
+        p.life += dt;
+        const k = p.life / p.max;
+        if (k >= 1 || p.y < -30 || p.x < -30 || p.x > W + 30) return false;
+        p.vx *= 1 - 1.2 * dt; p.vy = p.vy * (1 - .9 * dt) + 60 * dt;          /* 空気で減速し、少し落ちる */
+        p.vx += Math.sin(p.life * 9 + p.ph) * 90 * dt;                        /* 熱で揺れる */
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        const a = Math.min(1, k * 8) * (1 - k) * (.7 + .3 * Math.sin(p.life * 40 + p.ph));
+        const tl = .045;                                                     /* 尾の長さ（秒ぶん） */
+        g.globalAlpha = a;
+        g.strokeStyle = p.hot ? 'rgb(255,236,180)' : 'rgb(255,150,40)';
+        g.lineWidth = p.w;
+        g.beginPath(); g.moveTo(p.x - p.vx * tl, p.y - p.vy * tl); g.lineTo(p.x, p.y); g.stroke();
+        const s = p.w * 7;
+        g.drawImage(sprite, p.x - s / 2, p.y - s / 2, s, s);
+        return true;
+      };
+      for (const p of ps) if (!draw(p)) spawn(p, Math.random() < .55 ? 'fire' : 'any');
+      for (let i = bursts.length - 1; i >= 0; i--) if (!draw(bursts[i])) bursts.splice(i, 1);
+      g.globalAlpha = 1;
+    });
+  }
+
   document.querySelectorAll('[data-fx="fire"]').forEach(initFire);
   if (!reduce) document.querySelectorAll('[data-embers]').forEach(initEmbers);
+  if (!reduce) document.querySelectorAll('[data-sparks]').forEach(initSparks);
 })();
