@@ -551,6 +551,14 @@ html.is-zoom{overflow:hidden}
 .ctbl tbody th{text-align:left;font-size:12px;color:var(--mute);white-space:nowrap}
 .ctbl td.is-us{background:#fff1e0}
 .ctbl td.is-us b{font-weight:900;color:var(--fire1)}
+.ctbl td.is-us small{display:block;font-weight:900;font-size:11px;color:var(--fire1)}
+.cres{margin-top:14px;padding:12px;border-radius:10px;background:var(--washi)}
+.cres__lead{margin-top:6px;padding-left:1.1em;text-indent:-1.1em;font-weight:900;font-size:13.5px;line-height:1.6}
+.cres__lead::before{content:"●";color:var(--fire1);font-size:.8em;margin-right:.35em}
+.cres__nums{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 0;padding:0;list-style:none}
+.cres__nums li{display:grid;justify-items:center;gap:2px;padding:8px 4px;border-radius:8px;background:#fff1e0;font-weight:900;font-size:11.5px;color:var(--mute)}
+.cres__nums b{font:400 30px/1 var(--num);color:var(--fire1)}
+.cres__nums small{margin-left:2px;font:900 13px var(--f)}
 .case__dl{margin:12px 0 0;display:grid;gap:8px}
 .case__dl div{display:grid;gap:2px}
 .case__dl dt{width:max-content;padding:0 8px;border-radius:3px;background:var(--ink);color:#fff;font-weight:900;font-size:11.5px}
