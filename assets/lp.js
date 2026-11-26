@@ -302,9 +302,9 @@ document.querySelectorAll('form[data-apply], form[data-inquiry]').forEach(f => {
 
   const st = { way: 'online', days: null, minutes: 30, day: null, time: null, msg: '', input: {} };
 
-  const toApply = () => { show('apply'); document.getElementById('pane-apply').scrollIntoView({ block: 'start' }); };
+  const toApply = () => { show('inquiry'); document.getElementById('pane-inquiry').scrollIntoView({ block: 'start' }); };
   const note = (html, retry) => {
-    book.innerHTML = `<p class="book__wait">${html}<br><button type="button" data-act="apply">申し込むへ</button>${retry ? ' <button type="button" data-act="retry">読み込み直す</button>' : ''}</p>`;
+    book.innerHTML = `<p class="book__wait">${html}<br><button type="button" data-act="apply">問い合わせへ</button>${retry ? ' <button type="button" data-act="retry">読み込み直す</button>' : ''}</p>`;
   };
 
   const load = () => {
@@ -314,13 +314,13 @@ document.querySelectorAll('form[data-apply], form[data-inquiry]').forEach(f => {
       st.days = j.days || []; st.minutes = j.minutes || 30;
       if (!st.days.some(x => x.date === st.day)) { st.day = st.days[0] ? st.days[0].date : null; st.time = null; }
       draw();
-    }).catch(() => note('予約できる日時を読み込めませんでした。<br>時間をおいて開き直すか、「申し込む」からご連絡ください。', true));
+    }).catch(() => note('予約できる日時を読み込めませんでした。<br>時間をおいて開き直すか、「問い合わせ」からご連絡ください。', true));
   };
 
   const draw = () => {
-    if (!api) { note('予約カレンダーは準備中です。<br>お手数ですが「申し込む」からご連絡ください。'); return; }
+    if (!api) { note('予約カレンダーは準備中です。<br>お手数ですが「問い合わせ」からご連絡ください。'); return; }
     if (!st.days) { load(); return; }
-    if (!st.days.length) { note('いま予約できる日時がありません。<br>お手数ですが「申し込む」からご連絡ください。'); return; }
+    if (!st.days.length) { note('いま予約できる日時がありません。<br>お手数ですが「問い合わせ」からご連絡ください。'); return; }
     const err = st.msg ? `<p class="bk-err" role="alert">${esc(st.msg)}</p>` : '';
     if (!st.time) {
       const cur = st.days.find(x => x.date === st.day) || st.days[0];
