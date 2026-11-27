@@ -1,7 +1,7 @@
 @charset "UTF-8";
 /* 見出し・筆文字・数字のフォントは、使う文字だけに絞ってサイト内に置く（build_fonts.py で作る）。
    Google Fonts から細切れで届くと、1語の中で書体がバラバラに切り替わって見えるため */
-@font-face{font-family:"Dela Gothic One";src:url(fonts/dela.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Dela Gothic One";src:url(fonts/dela.woff2?v=2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Yuji Syuku";src:url(fonts/yuji.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Anton";src:url(fonts/anton.woff2) format("woff2");font-weight:400;font-display:swap}
 /* 一通入魂 LP：炭（黒）と和紙（生成り）のセクションを交互に。炎のグラデーション・筆文字・火の粉でメラメラ感。スマホ1カラム最大480px、PCは左右パネル */
@@ -387,7 +387,7 @@ a{color:inherit}
 @keyframes marquee{to{transform:translateX(-50%)}}
 @keyframes flow{to{background-position:0 12px}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}}
-@keyframes slideIn{from{opacity:0;transform:translateX(40%)}}
+@keyframes slideIn{from{opacity:.01;transform:translateX(40%)}} /* 0だと表示の計測（LCP）が登場後まで遅れるため、見えない程度の.01から */
 @keyframes thump{from{opacity:0;transform:rotate(-10deg) scale(2.2)}to{opacity:1;transform:rotate(-10deg) scale(1)}}
 @keyframes floatR{50%{transform:rotate(-8deg) translateY(-8px)}}
 @keyframes shout{0%{opacity:0;transform:scale(2.2)}60%{opacity:1;transform:scale(.92)}100%{opacity:1;transform:none}}
